@@ -29,7 +29,6 @@
                         <td>@mdo</td>
                         <td>
                             <a class="btn btn-primary" href="#" role="button">View</a>
-                            <a class="btn btn-danger" href="#" role="button">Delete</a>
                         </td>
                     </tr>
                     <tr>
