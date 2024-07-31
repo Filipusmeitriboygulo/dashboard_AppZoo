@@ -7,7 +7,7 @@
     <title>B-ZOO | Kebun Binatang</title>
     <link rel="shortcut icon" type="image/png" href="{{ asset('assets/auth/images/logos/') }}" />
     <link rel="stylesheet" href="{{ asset('assets/auth/css/styles.min.css') }}" />
-
+    
 
 </head>
 
@@ -35,6 +35,7 @@
         <script src="{{ asset('assets/auth/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
         <script src="{{ asset('assets/auth/libs/simplebar/dist/simplebar.js') }}"></script>
         <script src="{{ asset('assets/auth/js/dashboard.js') }}"></script>
+        
 </body>
 
 </html>
