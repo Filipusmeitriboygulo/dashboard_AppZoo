@@ -1,0 +1,130 @@
+body,
+html {
+  height: 100%;
+  margin: 0;
+}
+
+.font {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+/* Style Tambahan Untuk Navbar */
+.carousel {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.carousel-inner,
+.carousel-item,
+.carousel-item img {
+  height: 100vh;
+  object-fit: cover;
+}
+
+.hero {
+  position: relative;
+  z-index: 1;
+}
+
+section {
+  position: relative;
+}
+
+.navbar {
+  position: absolute;
+  z-index: 999;
+}
+
+.text-tengah {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  animation-duration: 3s;
+  animation-name: slidein;
+}
+
+/* Animasi CSS ini dari dokumentasi CSS  */
+@keyframes slidein {
+  from {
+    translate: 150vw 0;
+    scale: 200% 1;
+  }
+
+  to {
+    translate: 0 0;
+    scale: 100% 1;
+  }
+}
+
+@keyframes growshrink {
+  25%,
+  75% {
+    scale: 100%;
+  }
+
+  50% {
+    scale: 200%;
+    color: magenta;
+  }
+}
+
+/* Style Hero */
+.carousel-control-prev-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3E%3Cpath d='M5.25 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3E%3C/svg%3E") !important;
+}
+
+.carousel-control-next-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3E%3Cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3E%3C/svg%3E") !important;
+}
+
+/* Hover ini dari dokumentasi di internet */
+.nav-link:hover {
+  text-shadow: 0px 0px 6px rgba(255, 255, 255, 1);
+  -webkit-box-shadow: 0px 5px 40px -10px rgba(0, 0, 0, 0.57);
+  -moz-box-shadow: 0px 5px 40px -10px rgba(0, 0, 0, 0.57);
+  transition: all 0.4s ease 0s;
+}
+
+/* Card Style */
+.card-style {
+  padding: 1.5em 0.5em 0.5em;
+  text-align: center;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.card-img-top {
+  width: 50%;
+  margin: 0 auto;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Card */
+.card-img-top .card-img-fixed .w-100 :hover {
+  box-shadow: 0 0 0 10px;
+  transition: 0.5s ease;
+}
+
+/* Tag a Hover */
+
+/* a {
+  transition: 500ms linear;
+}
+
+a:hover {
+  transform: scale(1.1);
+} */
+
+.card {
+   transition: 500ms linear;
+}
+
+.card:hover {
+    transform: scale(1.1);
+}
