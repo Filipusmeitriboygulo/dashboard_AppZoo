@@ -17,8 +17,7 @@ return new class extends Migration
             $table->string('status_pembayaran');
             $table->bigInteger('total_harga');
             $table->date('tanggal_pembayaran');
-            $table->unsignedBigInteger('id_pesanan');
-            $table->foreign('id_pesanan')->references('id')->on('pesanans')->onUpdate('cascade')->onDelete('restrict');
+            
         });
     }
 

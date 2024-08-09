@@ -17,12 +17,12 @@ return new class extends Migration
             $table->date('tanggal_pesanan');
             $table->bigInteger('harga');
             $table->integer('jumlah_tiket');
-            $table->unsignedBigInteger('id_pembeli');
-            $table->unsignedBigInteger('id_tiket');
+            // $table->unsignedBigInteger('id_pembeli');
+            // $table->unsignedBigInteger('id_tiket');
 
-            // Foreign key constraints
-            $table->foreign('id_pembeli')->references('id')->on('pembelis')->onUpdate('cascade')->onDelete('restrict');
-            $table->foreign('id_tiket')->references('id')->on('tikets')->onUpdate('cascade')->onDelete('restrict');
+            // // Foreign key constraints
+            // $table->foreign('id_pembeli')->references('id')->on('pembelis')->onUpdate('cascade')->onDelete('restrict');
+            // $table->foreign('id_tiket')->references('id')->on('tikets')->onUpdate('cascade')->onDelete('restrict');
         });
     }
 

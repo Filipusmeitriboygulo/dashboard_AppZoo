@@ -15,36 +15,25 @@
                 <thead>
                     <tr>
                         <th scope="col">No</th>
-                        <th scope="col">Customer</th>
+                        <th scope="col">Tanggal Pesanan</th>
+                        <th scope="col">Jumlah Tiket</th>
                         <th scope="col">Total Harga</th>
-                        <th scope="col">Status</th>
                         <th scope="col">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <th scope="row">1</th>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td>@mdo</td>
-                        <td>
-                            <a class="btn btn-primary" href="#" role="button">View</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">2</th>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
-                        <td>@mdo</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">3</th>
-                        <td>Larry the Bird</td>
-                        <td>@twitter</td>
-                        <td>@mdo</td>
-                        <td>@mdo</td>
-                    </tr>
+                    @foreach ($pesanan as $pesananItem)
+                        <tr>
+                            <th scope="row">{{ $loop->iteration }}</th>
+                            <td>{{ $pesananItem->pesanan->tanggal_pesanan }}</td>
+                            <td>{{ $pesananItem->pesanan->jumlah_tiket }}</td>
+                            <td>{{ $pesananItem->pesanan->harga }}</td>
+                            <td>
+                                <a class="btn btn-primary" href="{{ route('pembeli', $pesananItem->id) }}"
+                                    role="button">View</a>
+                            </td>
+                        </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>

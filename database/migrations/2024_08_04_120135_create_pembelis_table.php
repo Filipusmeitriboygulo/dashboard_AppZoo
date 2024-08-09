@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('pembelis', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
             $table->string('email');
             $table->string('nama');
-            $table->string('status');
+            $table->enum('status', ['unpaid', 'paid']);
             $table->string('nohp');
+            $table->foreignId('id_pesanan')->constrained('pesanans')->onDelete('cascade');
+            $table->timestamps();
+            // $table->unsignedBigInteger('id_pesanan');
+            // $table->foreign('id_pesanan')->references('id')->on('pesanans')->onUpdate('cascade')->onDelete('restrict');
         });
     }
 
