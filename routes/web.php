@@ -10,6 +10,7 @@ use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\SatwaController;
 use App\Http\Controllers\PetaController;
 use App\Http\Controllers\KontakController;
+use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\TiketController;
 use App\Http\Controllers\PembeliController;
 
@@ -45,6 +46,9 @@ Route::get('/order/{pembeliId}/{pesananId}', [TiketController::class, 'order'])-
 // Pesanan  
 Route::post('/pesanan/input', [PesananController::class, 'input'])->name('pesanan.input');
 Route::post('/pembeli/input', [PembeliController::class, 'input'])->name('pembeli.input');
+
+// Pembayaran
+Route::get('/pembayaran',[PembayaranController::class, 'index'])->name('pembayaran');
 
 
 Auth::routes();

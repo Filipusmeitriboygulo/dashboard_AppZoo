@@ -18,7 +18,7 @@ class PembeliController extends Controller
         return view('auth.pembeli', ['pembeli' => $pembeli]);
     }
 
-    // public function index($id)
+    // public function DetailOrder($id)
     // {
 
     //     $pembeli = Pembeli::findorFail($id);
@@ -26,7 +26,7 @@ class PembeliController extends Controller
     // }
 
 
-    // Untuk Froen End
+    // Untuk Front End
     public function input(Request $request)
     {
         // Validasi data yang diterima dari request
@@ -53,3 +53,4 @@ class PembeliController extends Controller
         return redirect()->route('order', ['pembeliId' => $pembeliId, 'pesananId' => $pesananId]);
     }
 }
+    

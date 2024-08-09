@@ -15,7 +15,7 @@
 
     <!-- Midtrans -->
     <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js"
-        data-client-key="SB-Mid-client-9F7RXT61DEZygAi6"></script>
+        data-client-key="{{ config('midtrans.client_key') }}"></script>
 
 </head>
 

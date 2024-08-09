@@ -1,8 +1,3 @@
-    <?php
-    var_dump($pesananId);
-    
-    ?>
-
     <x-layout>
         <x-header></x-header>
         <!-- Header Berita -->
@@ -87,8 +82,6 @@
                                 aria-describedby="basic-addon1">
                         </div>
                         <div class="mb-3">
-                            <input type="text" name="id_pesanan" id="id_pesanan" class="form-control"
-                                aria-label="id_pesanan" aria-describedby="basic-addon1" value="{{ $pesananId }}">
                         </div>
                     </div>
                 </div>

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pembeli;
 use Illuminate\Http\Request;
+
 
 class TiketController extends Controller
 {
@@ -19,8 +21,10 @@ class TiketController extends Controller
     }
 
     public function order($pembeliId, $pesananId)
+
     {
-        return view('tiket.order', compact('pesananId', 'pembeliId'));
+        $pembeli = Pembeli::findorFail($pembeliId);
+        return view('tiket.order', compact('pesananId', 'pembeliId','pembeli'));
     }
 
 }

@@ -27,7 +27,9 @@
                             <th scope="row">{{ $loop->iteration }}</th>
                             <td>{{ $pesananItem->pesanan->tanggal_pesanan }}</td>
                             <td>{{ $pesananItem->pesanan->jumlah_tiket }}</td>
-                            <td>{{ $pesananItem->pesanan->harga }}</td>
+                            <td>Rp.
+                                {{ number_format($pesananItem->pesanan->jumlah_tiket * $pesananItem->pesanan->harga, 0, ',', '.') }}
+                            </td>
                             <td>
                                 <a class="btn btn-primary" href="{{ route('pembeli', $pesananItem->id) }}"
                                     role="button">View</a>
