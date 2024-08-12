@@ -39,4 +39,36 @@ class PesananController extends Controller
         // Redirect ke halaman detail_tiket dengan pesananId sebagai parameter
         return redirect()->route('detail_tiket', ['pesananId' => $pesananId]);
     }
+
+    // public function store(){
+    //     $ticket = Ticket::findOrFail($ticketId);
+    //     $concert = $ticket->concert;
+    //     $order = null;
+
+    //     DB::transaction(function () use ($request, $ticket, &$order) {
+    //         // Create Order
+    //         $order = Order::create([
+    //             'email' => $request->input('email'),
+    //             'firstname' => $request->input('first_name'),
+    //             'lastname' => $request->input('last_name'),
+    //             'phone' => $request->input('phone'),
+    //             'total_price' => $ticket->price,
+    //             'status' => 'pending',
+    //         ]);
+
+    //         // Create Order Item
+    //         OrderItem::create([
+    //             'order_id' => $order->id,
+    //             'ticket_id' => $ticket->id,
+    //             'quantity' => 1,
+    //             'price' => $ticket->price,
+    //         ]);
+    //     });
+
+    //     if ($order) {
+    //         return $this->checkout($order, $request);
+    //     } else {
+    //         return response()->json(['error' => 'Order creation failed'], 500);
+    //     }
+    // }
 }

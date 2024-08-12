@@ -88,6 +88,12 @@
                         <h1 class="fw-normal fs-5 mt-2">{{ $pembeli->pesanan->jumlah_tiket }}</h1>
                     </div>
                 </div>
+                <div class="harga-tiket d-flex align-items-center justify-content-between mt-4 mb-2">
+                    <h1 class="fw-normal fs-5">Payment URL</h1>
+                    <div class="d-flex justify-content-end align-items-end">
+                        <h1 class="fw-normal fs-5 mt-2">{{ $pembeli->pesanan->paymentUrl }}</h1>
+                    </div>
+                </div>
                 <div>
                 </div>
                 <div class="harga-tiket d-flex align-items-center justify-content-between">
@@ -101,13 +107,23 @@
             </div>
         </div>
         <div class="submit d-flex justify-content-end" style="margin-top: 70px;">
-            <button type="button" class="btn btn-outline-warning me-5">
-                <a href="{{ url('/detail-tiket/{pesananId}') }}" class="text-decoration-none text-warning">Kembali</a>
-            </button>
-            <button id="pay-button" type="button" class="btn btn-outline-primary">Checkout</button>
+
+            <form action="{{ route('pembayaran') }}" method="POST">
+                @csrf
+                <div class="mb-3">
+                    <input type="hidden" class="form-control" id="pembeli_id" name="pembeli_id"
+                        value="{{ $pembeli->id }}" required>
+                </div>
+                <button type="button" class="btn btn-outline-warning me-5">
+                    <a href="{{ url('/detail-tiket/{pesananId}') }}"
+                        class="text-decoration-none text-warning">Kembali</a>
+                </button>
+                <button type="submit" class="btn btn-outline-primary">Checkout</button>
+            </form>
+
         </div>
 
-        <script type="text/javascript">
+        {{-- <script type="text/javascript">
             document.getElementById('pay-button').addEventListener('click', async function() {
                 // Membuat objek formData
                 var formData = new FormData();
@@ -136,7 +152,7 @@
                     console.error(err.message);
                 }
             });
-        </script>
+        </script> --}}
 
         {{-- <script type="text/javascript">
             document.getElementById('pay-button').addEventListener('click', async function() {

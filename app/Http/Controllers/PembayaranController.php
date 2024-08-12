@@ -5,23 +5,28 @@ namespace App\Http\Controllers;
 use App\Models\Pembeli;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Midtrans\Config;
 
 class PembayaranController extends Controller
 {
     public function index(Request $request)
     {
-        
+
         // Konfigurasi Midtrans
-        \Midtrans\Config::$serverKey = config('midtrans.server_key');
+        \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY', 'SB-Mid-server-OntdCcvk7QyWMVYlJRhf4JpH');
         // Set to Development/Sandbox Environment (default). Set to true for Production Environment (accept real transaction).
-        \Midtrans\Config::$isProduction = false;
+        \Midtrans\Config::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
         // Set sanitization on (default)
         \Midtrans\Config::$isSanitized = true;
-        // Set 3DS transaction for credit card to true
+        // Set 3DS transaction for credit card to truefalse
         \Midtrans\Config::$is3ds = true;
+        Log::info('Server Key: ' . env('MIDTRANS_SERVER_KEY'));
+
 
         // Ambil data pembeli dan pesanan
         $pembeli = Pembeli::findorFail($request->pembeli_id);
+        $pesanan = $pembeli->pesanan;
         $tanggal = $pembeli->pesanan->tanggal;
         $jumlah = $pembeli->pesanan->jumlah_tiket;
         $nama = $pembeli->nama;
@@ -32,7 +37,7 @@ class PembayaranController extends Controller
         // Siapkan parameter untuk Midtrans
         $params = array(
             'transaction_details' => array(
-                'order_id' => $pembeli->pesanan->id,
+                'order_id' => $pesanan->id,
                 'gross_amount' => $harga * $jumlah,
             ),
             'customer_details' => array(
@@ -45,38 +50,41 @@ class PembayaranController extends Controller
                     'id' => 'a1',
                     'price' => $harga,
                     'quantity' => $jumlah,
-                    'name' => $tanggal
+                    'name' => 'Tiket Event - ' . $tanggal
                 )
             ),
             "callbacks" => array(
                 "finish" => route('tiket')
             )
         );
-
         try {
-            // Generate Snap Token
-            $snapToken = \Midtrans\Snap::getSnapToken($params);
-            if ($snapToken) {
-                return response()->json(['token' => $snapToken]);
-            } else {
-                throw new \Exception('Failed to generate Snap Token');
-            }
-            // Kirim data ke view termasuk token
-            return redirect()->route('order')
-                ->with('tanggal', $tanggal)
-                ->with('jumlah', $jumlah)
-                ->with('nama', $nama)
-                ->with('email', $email)
-                ->with('kontak', $kontak)
-                ->with('snapToken', $snapToken);
+            // Get payment Url
+            $paymentUrl = \Midtrans\Snap::createTransaction($params)->redirect_url;
 
-        } catch (Exception $e) {
-            // Tangani error
+            if (!$paymentUrl) {
+                Log::error('Payment URL is empty', ['params' => $params]);
+                return response()->json(['error' => 'Payment URL is empty'], 500);
+            }
+
+            return redirect($paymentUrl);
+        } catch (\Exception $e) {
+            Log::error("Error during checkout", ['error' => $e->getMessage()]);
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
 
-    
+    public function callback(Request $request) {
+        // Validasi data masuk 
+        $request->validate([
+            'order_id' =>'required|string',
+            'status_code' =>'required|string',
+            'grosss_amount' =>'required|numeric',
+            'signature_key' =>'required|string',
+            'transaction_status' =>'required|string',
+        ]);
 
+        // A
+        $serverKey = 
+    }   
 }

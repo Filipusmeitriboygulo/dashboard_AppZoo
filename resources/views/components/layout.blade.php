@@ -13,10 +13,10 @@
         rel="stylesheet">
     <link rel="icon" href="assets/images/vinyl-fill.svg" type="image/x-icon">
 
-    <!-- Midtrans -->
+    {{-- <!-- Midtrans -->
     <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js"
             data-client-key="{{ config('midtrans.client_key') }}">
-    </script>
+    </script> --}}
 
 </head>
 
