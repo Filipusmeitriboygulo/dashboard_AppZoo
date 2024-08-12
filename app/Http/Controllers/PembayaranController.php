@@ -8,10 +8,10 @@ use Illuminate\Http\Request;
 
 class PembayaranController extends Controller
 {
-    //
-    public function index (Request $request) {
-        $pembeli = Pembeli::create($request->all());
-        // Set your Merchant Server Key
+    public function index(Request $request)
+    {
+        
+        // Konfigurasi Midtrans
         \Midtrans\Config::$serverKey = config('midtrans.server_key');
         // Set to Development/Sandbox Environment (default). Set to true for Production Environment (accept real transaction).
         \Midtrans\Config::$isProduction = false;
@@ -20,13 +20,16 @@ class PembayaranController extends Controller
         // Set 3DS transaction for credit card to true
         \Midtrans\Config::$is3ds = true;
 
+        // Ambil data pembeli dan pesanan
+        $pembeli = Pembeli::findorFail($request->pembeli_id);
         $tanggal = $pembeli->pesanan->tanggal;
         $jumlah = $pembeli->pesanan->jumlah_tiket;
         $nama = $pembeli->nama;
-        $email =$pembeli->email;
-        $kontak =$pembeli->nohp;
+        $email = $pembeli->email;
+        $kontak = $pembeli->nohp;
         $harga = 60000;
 
+        // Siapkan parameter untuk Midtrans
         $params = array(
             'transaction_details' => array(
                 'order_id' => $pembeli->pesanan->id,
@@ -46,16 +49,34 @@ class PembayaranController extends Controller
                 )
             ),
             "callbacks" => array(
-                "finish" => "http://127.0.0.1:8000/tiket"
+                "finish" => route('tiket')
             )
         );
 
         try {
+            // Generate Snap Token
             $snapToken = \Midtrans\Snap::getSnapToken($params);
-            echo $snapToken;
-        } catch (Exception $e) {
-            echo $e->getMessage();
-        }
+            if ($snapToken) {
+                return response()->json(['token' => $snapToken]);
+            } else {
+                throw new \Exception('Failed to generate Snap Token');
+            }
+            // Kirim data ke view termasuk token
+            return redirect()->route('order')
+                ->with('tanggal', $tanggal)
+                ->with('jumlah', $jumlah)
+                ->with('nama', $nama)
+                ->with('email', $email)
+                ->with('kontak', $kontak)
+                ->with('snapToken', $snapToken);
 
+        } catch (Exception $e) {
+            // Tangani error
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
+
+
+    
+
 }

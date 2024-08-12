@@ -114,7 +114,7 @@
         <div class="text-end" style="background-color: #373A40; margin:0px 280px 0px 280px">
 
             <a class="text-white" href="https://heroic-pony-19f6e8.netlify.app/">
-                <img class="" src="assets/img/logo1.png" height="70px" width="70px" alt="" /></a>
+                <img class="" src="{{ asset('assets/img/logo1.png ')}}" height="70px" width="70px" alt="" /></a>
         </div>
         <!-- Copyright -->
     </footer>

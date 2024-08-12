@@ -25,16 +25,16 @@
                 <div class="col-lg-4  d-flex flex-column align-items-center justify-content-center cursor-pointer ">
                     <h5 class="font-light fs-6 mb-1 uppercase text-primary-dark">Tiket</h5>
                     <h6
-                        class="font-bold fs-2 d-flex align-items-center justify-content-center text-gray-500 bg-gray-200 border border-primary rounded rounded-circle  w-75 h-75 bg-primary ">
-                        <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="detail_tiket.php"
+                        class="font-bold fs-2 d-flex align-items-center justify-content-center text-gray-500 bg-gray-200 border border-primary rounded rounded-circle  w-75 h-75  ">
+                        <a class="nav-link" id="pills-home-tab" data-toggle="pill" href="detail_tiket.php"
                             role="tab" aria-controls="pills-home" aria-selected="true">1</a>
                     </h6>
                 </div>
                 <div class="col-lg-4  d-flex flex-column align-items-center justify-content-center cursor-pointer ">
                     <h5 class="font-light fs-6 mb-1 uppercase text-gray-500">Detail</h5>
                     <h6
-                        class="font-bold fs-2 d-flex align-items-center justify-content-center text-gray-500 bg-gray-200 border border-primary rounded rounded-circle  w-75 h-75 ">
-                        <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="pesanan.php" role="tab"
+                        class="font-bold fs-2 d-flex align-items-center justify-content-center text-gray-500 bg-gray-200 border border-primary rounded rounded-circle  w-75 h-75 bg-primary">
+                        <a class="nav-link active" id="pills-profile-tab" data-toggle="pill" href="pesanan.php" role="tab"
                             aria-controls="pills-profile" aria-selected="false">2</a>
                     </h6>
                 </div>
@@ -82,15 +82,16 @@
                                 aria-describedby="basic-addon1">
                         </div>
                         <div class="mb-3">
+                            <input type="hidden" name="id_pesanan" id="id_pesanan" class="form-control" aria-label="id_pesanan"
+                                aria-describedby="basic-addon1" value="{{ $pesananId }}">
                         </div>
                     </div>
                 </div>
                 <div class="submit d-flex justify-content-end" style="margin-top: 70px;">
-                    <button type="button" class="btn btn-outline-warning me-5"><a href="tiket.php"
+                    <button type="button" class="btn btn-outline-warning me-5"><a href="{{ url('/tiket') }}"
                             class="text-decoration-none text-warning">Kembali</a></button>
                     <button type="submit" class="btn btn-outline-primary">Selanjutnya</button>
                 </div>
             </form>
-
         </section>
     </x-layout>

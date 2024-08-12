@@ -48,7 +48,9 @@ Route::post('/pesanan/input', [PesananController::class, 'input'])->name('pesana
 Route::post('/pembeli/input', [PembeliController::class, 'input'])->name('pembeli.input');
 
 // Pembayaran
-Route::get('/pembayaran',[PembayaranController::class, 'index'])->name('pembayaran');
+// Route::post('/payment-form', [PembayaranController::class, 'showPaymentForm'])->name('payment.form');
+Route::post('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran');
+
 
 
 Auth::routes();

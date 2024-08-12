@@ -84,8 +84,6 @@
                             class="btn btn-outline-primary w-25 rounded rounded-5">Pesan</button>
                     </div>
                 </form>
-
-
             </div>
         </div>
     </section>
