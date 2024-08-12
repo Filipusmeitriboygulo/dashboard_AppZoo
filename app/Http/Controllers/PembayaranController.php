@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pembayaran;
 use App\Models\Pembeli;
 use Exception;
 use Illuminate\Http\Request;
@@ -10,6 +11,8 @@ use Midtrans\Config;
 
 class PembayaranController extends Controller
 {
+
+
     public function index(Request $request)
     {
 
@@ -71,20 +74,51 @@ class PembayaranController extends Controller
             Log::error("Error during checkout", ['error' => $e->getMessage()]);
             return response()->json(['error' => $e->getMessage()], 500);
         }
-    }
+    } 
 
+    // Method Callback
+    public function callback(Request $request)
+    {
 
-    public function callback(Request $request) {
         // Validasi data masuk 
         $request->validate([
-            'order_id' =>'required|string',
-            'status_code' =>'required|string',
-            'grosss_amount' =>'required|numeric',
-            'signature_key' =>'required|string',
-            'transaction_status' =>'required|string',
+            'order_id' => 'required|string',
+            'status_code' => 'required|string',
+            'grosss_amount' => 'required|numeric',
+            'signature_key' => 'required|string',
+            'transaction_status' => 'required|string',
         ]);
 
-        // A
-        $serverKey = 
-    }   
+        // Ambil  server
+        $serverKey = config('midtrans.server_key');
+        // hash
+        $hashed = hash("sha512", $request->order_id . $request->status_code . $request->grosss_amount . $serverKey);
+        if ($hashed === $request->signature_key) {
+            // Periksa Status Transaksi 
+            if ($request->trasaction_status === 'capture' || $request->trasaction_status === 'settlement') {
+
+                // ini kode percobaan
+                $pembeli = Pembeli::find($request->pembeli_id);
+                $pesanan = $pembeli->pesanan->id;
+
+                if ($pesanan) {
+                    $pembeli->update(['status' => 'paid']);
+
+                    // Simpan informasi ke tabel pembayaran
+                    $pembayaran = new Pembayaran();
+                    $pembayaran->id_pesanan = $pesanan->id;
+                    $pembayaran->amount = $request->gross_amount;
+                    $pembayaran->metode_pembayaran = $request->payment_type ?? 'unkwon';
+                    $pembayaran->status_pembayaran = $request->transaction_status;
+                    $pembayaran->transaction_id = $request->transaction_id ?? null;
+                    $pembayaran->save();
+
+                    // Generate tiket
+                    $this->generateTicket($pesanan);
+                } else {
+                    Log::error('Pesanan Tidak Ditemukan' . $request->order_id);
+                }
+            }
+        }
+    }
 }
