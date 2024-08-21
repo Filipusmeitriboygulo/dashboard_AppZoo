@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pembayaran;
 use App\Models\Pembeli;
+use App\Models\Pesanan;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -40,7 +41,7 @@ class PembayaranController extends Controller
         // Siapkan parameter untuk Midtrans
         $params = array(
             'transaction_details' => array(
-                'order_id' => $pesanan->id,
+                'order_id' => mt_rand(10000,99999),
                 'gross_amount' => $harga * $jumlah,
             ),
             'customer_details' => array(
@@ -57,7 +58,7 @@ class PembayaranController extends Controller
                 )
             ),
             "callbacks" => array(
-                "finish" => route('tiket')
+                'finish' => "http://localhost:8000/api/midtrans-callback",
             )
         );
         try {
@@ -79,12 +80,11 @@ class PembayaranController extends Controller
     // Method Callback
     public function callback(Request $request)
     {
-
         // Validasi data masuk 
         $request->validate([
             'order_id' => 'required|string',
             'status_code' => 'required|string',
-            'grosss_amount' => 'required|numeric',
+            'gross_amount' => 'required|numeric',
             'signature_key' => 'required|string',
             'transaction_status' => 'required|string',
         ]);
@@ -98,11 +98,10 @@ class PembayaranController extends Controller
             if ($request->trasaction_status === 'capture' || $request->trasaction_status === 'settlement') {
 
                 // ini kode percobaan
-                $pembeli = Pembeli::find($request->pembeli_id);
-                $pesanan = $pembeli->pesanan->id;
+                $pesanan = Pesanan::find($request->order_id);
 
                 if ($pesanan) {
-                    $pembeli->update(['status' => 'paid']);
+                    $pesanan->pembeli->update(['status' => 'paid']);
 
                     // Simpan informasi ke tabel pembayaran
                     $pembayaran = new Pembayaran();
@@ -114,11 +113,19 @@ class PembayaranController extends Controller
                     $pembayaran->save();
 
                     // Generate tiket
-                    $this->generateTicket($pesanan);
+                    // $this->generateTicket($pesanan);
                 } else {
                     Log::error('Pesanan Tidak Ditemukan' . $request->order_id);
                 }
             }
         }
+    }
+
+
+    // Method Invoice
+    public function invoice(Request $request) {
+        $pesananId = $request->query('id_pesanan');
+        $pesanan= Pesanan::find($pesananId);
+        return view('auth.pembeli', compact('pesanan'));
     }
 }
