@@ -33,6 +33,7 @@ Route::get('/kontak', [KontakController::class, 'index'])->name('kontak');
 // Tiket
 
 Route::get('/tiket', [TiketController::class, 'index'])->name('tiket');
+Route::get('/midtrans/callback', [PembayaranController::class, 'callback'])->name('midtrans.callback');
 // Route::post('/detail-tiket/{pesananId}', [TiketController::class, 'detail_tiket'])->name('detail_tiket');
 // Route::post('/tiket', [TiketController::class,'index'])->name('tiket');
 Route::get('/detail-tiket/{pesananId}', [TiketController::class, 'DetailTiket'])->name('detail_tiket');
