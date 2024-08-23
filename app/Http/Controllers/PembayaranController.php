@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ContinuePayment;
+use App\Mail\PaymentStatusEmail;
 use App\Models\Pembayaran;
 use App\Models\Pembeli;
 use App\Models\Pesanan;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Midtrans\Config;
 
 class PembayaranController extends Controller
@@ -36,6 +39,7 @@ class PembayaranController extends Controller
         $kontak = $pembeli->nohp;
         $harga = 60000;
 
+
         // Siapkan parameter untuk Midtrans
         $params = array(
             'transaction_details' => array(
@@ -56,7 +60,8 @@ class PembayaranController extends Controller
                 )
             ),
             "callbacks" => array(
-                "finish" => route('midtrans.callback')
+                "finish" => route('midtrans.callback'),
+                "error" => route('midtrans.callback')
             )
         );
         try {
@@ -67,6 +72,10 @@ class PembayaranController extends Controller
                 Log::error('Payment URL is empty', ['params' => $params]);
                 return response()->json(['error' => 'Payment URL is empty'], 500);
             }
+            // Lakukan validasi dan update status transaksi di database
+    
+            // Kirim email setelah menerima notifikasi dari Midtrans
+            Mail::to($pembeli->email)->send(new ContinuePayment($pembeli, $paymentUrl));
 
             return redirect($paymentUrl);
         } catch (\Exception $e) {
@@ -77,16 +86,27 @@ class PembayaranController extends Controller
 
     // Method Callback
     public function callback(Request $request)
-    {
-        $order_id = $request->input('order_id');
+{
+    $order_id = $request->input('order_id');
 
-        $pembeli = Pembeli::where('id_pesanan', $order_id)->first();
+    $pembeli = Pembeli::where('id_pesanan', $order_id)->first();
 
-        if($pembeli){
+    if ($pembeli) {
+        $status = '';
+        if ($request->transaction_status === 'expire') {
+            $pembeli->status = 'expire';
+            $status = 'expire';
+        } elseif ($request->transaction_status === 'settlement') {
             $pembeli->status = 'paid';
-            $pembeli->save();
+            $status = 'paid';
         }
-        
-        return redirect()->route('index');
+        $pembeli->save();
+
+        // Kirim email status pembayaran
+        // Mail::to($pembeli->email)->send(new PaymentStatusEmail($pembeli, $status));
     }
+
+    return redirect()->route('index');
+}
+
 }

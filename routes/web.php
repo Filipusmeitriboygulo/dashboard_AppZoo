@@ -13,7 +13,8 @@ use App\Http\Controllers\KontakController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\TiketController;
 use App\Http\Controllers\PembeliController;
-
+use App\Mail\PaymentStatusEmail;
+use Illuminate\Support\Facades\Mail;
 
 // Route::get('/', function () {
 //     return view('auth.login');
