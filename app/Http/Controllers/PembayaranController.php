@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\ContinuePayment;
 use App\Mail\PaymentStatusEmail;
+use App\Mail\TicketMail;
 use App\Models\Pembayaran;
 use App\Models\Pembeli;
 use App\Models\Pesanan;
@@ -45,7 +46,7 @@ class PembayaranController extends Controller
         // Siapkan parameter untuk Midtrans
         $params = array(
             'transaction_details' => array(
-                'order_id' => mt_rand(100000,999999),
+                'order_id' => mt_rand(100000, 999999),
                 'gross_amount' => $harga * $jumlah,
             ),
             'customer_details' => array(
@@ -88,8 +89,8 @@ class PembayaranController extends Controller
     // Method Callback
     public function callback(Request $request)
     {
-        $order_id =$request->input('pesananId');
-        $pembeli = Pembeli::where('id_pesanan', $order_id)->first();
+        $id_pesanan = $request->input('pesananId');
+        $pembeli = Pembeli::where('id_pesanan', $id_pesanan)->first();
 
         if ($pembeli) {
             if ($request->transaction_status === 'expire') {
@@ -98,9 +99,25 @@ class PembayaranController extends Controller
                 $pembeli->status = 'paid';
             }
         }
-
         $pembeli->save();
+        $this->generateAndSendTicket($pembeli);
 
         return redirect()->route('index');
+    }
+
+    protected function generateAndSendTicket(Pembeli $pembeli)
+    {
+        // Load view for the ticket
+        // $pdf = PDF::loadView('tickets.ticket', compact('order'));
+
+        // // Define file name and path
+        // $fileName = 'ticket_' . $pembeli->id . '.pdf';
+        // $filePath = storage_path('app/public/' . $fileName);
+
+        // // Save the PDF to the storage
+        // $pdf->save($filePath);
+
+        // Send the ticket via email
+        Mail::to($pembeli->email)->send(new TicketMail($pembeli));
     }
 }
