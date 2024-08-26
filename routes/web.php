@@ -35,22 +35,14 @@ Route::get('/kontak', [KontakController::class, 'index'])->name('kontak');
 
 Route::get('/tiket', [TiketController::class, 'index'])->name('tiket');
 Route::get('/midtrans/callback', [PembayaranController::class, 'callback'])->name('midtrans.callback');
-// Route::post('/detail-tiket/{pesananId}', [TiketController::class, 'detail_tiket'])->name('detail_tiket');
-// Route::post('/tiket', [TiketController::class,'index'])->name('tiket');
 Route::get('/detail-tiket/{pesananId}', [TiketController::class, 'DetailTiket'])->name('detail_tiket');
-
-
-
 Route::get('/order/{pembeliId}/{pesananId}', [TiketController::class, 'order'])->name('order');
-// Route::get('/order/{pembeliId}', [TiketController::class, 'showDetailOrder'])->name('show_detail_order');
-
-
 // Pesanan  
 Route::post('/pesanan/input', [PesananController::class, 'input'])->name('pesanan.input');
 Route::post('/pembeli/input', [PembeliController::class, 'input'])->name('pembeli.input');
 
 // Pembayaran
-// Route::post('/payment-form', [PembayaranController::class, 'showPaymentForm'])->name('payment.form');
+
 Route::post('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran');
 
 

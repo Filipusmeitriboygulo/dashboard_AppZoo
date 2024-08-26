@@ -38,12 +38,14 @@ class PembayaranController extends Controller
         $email = $pembeli->email;
         $kontak = $pembeli->nohp;
         $harga = 60000;
+        $pesananId = $pesanan->id;
+
 
 
         // Siapkan parameter untuk Midtrans
         $params = array(
             'transaction_details' => array(
-                'order_id' => $pesanan->id,
+                'order_id' => mt_rand(100000,999999),
                 'gross_amount' => $harga * $jumlah,
             ),
             'customer_details' => array(
@@ -53,14 +55,14 @@ class PembayaranController extends Controller
             ),
             'item_details' => array(
                 array(
-                    'id' => 'a1',
+                    'id' => $pesanan->id,
                     'price' => $harga,
                     'quantity' => $jumlah,
                     'name' => 'Tiket Event - ' . $tanggal
                 )
             ),
             "callbacks" => array(
-                "finish" => route('midtrans.callback'),
+                "finish" => route('midtrans.callback', ['pesananId' => $pesananId]),
                 "error" => route('midtrans.callback')
             )
         );
@@ -72,8 +74,7 @@ class PembayaranController extends Controller
                 Log::error('Payment URL is empty', ['params' => $params]);
                 return response()->json(['error' => 'Payment URL is empty'], 500);
             }
-            // Lakukan validasi dan update status transaksi di database
-    
+
             // Kirim email setelah menerima notifikasi dari Midtrans
             Mail::to($pembeli->email)->send(new ContinuePayment($pembeli, $paymentUrl));
 
@@ -86,27 +87,20 @@ class PembayaranController extends Controller
 
     // Method Callback
     public function callback(Request $request)
-{
-    $order_id = $request->input('order_id');
+    {
+        $order_id =$request->input('pesananId');
+        $pembeli = Pembeli::where('id_pesanan', $order_id)->first();
 
-    $pembeli = Pembeli::where('id_pesanan', $order_id)->first();
-
-    if ($pembeli) {
-        $status = '';
-        if ($request->transaction_status === 'expire') {
-            $pembeli->status = 'expire';
-            $status = 'expire';
-        } elseif ($request->transaction_status === 'settlement') {
-            $pembeli->status = 'paid';
-            $status = 'paid';
+        if ($pembeli) {
+            if ($request->transaction_status === 'expire') {
+                $pembeli->status = 'expire';
+            } elseif ($request->transaction_status === 'settlement') {
+                $pembeli->status = 'paid';
+            }
         }
+
         $pembeli->save();
 
-        // Kirim email status pembayaran
-        // Mail::to($pembeli->email)->send(new PaymentStatusEmail($pembeli, $status));
+        return redirect()->route('index');
     }
-
-    return redirect()->route('index');
-}
-
 }

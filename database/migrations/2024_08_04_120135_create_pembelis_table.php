@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('email');
             $table->string('nama');
-            $table->enum('status', ['unpaid', 'paid']);
+            $table->enum('status', ['unpaid', 'paid', 'expire']);
             $table->string('nohp');
             $table->foreignId('id_pesanan')->constrained('pesanans')->onDelete('cascade');
             $table->timestamps();

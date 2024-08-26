@@ -60,19 +60,19 @@
             <div class="col-lg-7 mt-2 mb-2 p-2 ps-3">
                 <h1 class="fw-semibold fs-3 text-uppercase">Detail Kontak </h1>
                 <p class="mt-5">
-                    Nama Lengkap
+                    Nama Lengkap :
                 </p>
                 <p>
                     {{ $pembeli->nama }}
                 </p>
                 <p>
-                    Email
+                    Email :
                 </p>
                 <p>
                     {{ $pembeli->email }}
                 </p>
                 <p>
-                    Nomor Kontak
+                    Nomor Kontak :
                 </p>
                 <p>
                     {{ $pembeli->nohp }}
@@ -83,21 +83,15 @@
                     <h1 class="fw-semibold fs-3 text-uppercase">Detail Pembelian</h1>
                 </div>
                 <div class="harga-tiket d-flex align-items-center justify-content-between mt-4 mb-2">
-                    <h1 class="fw-normal fs-5">Tiket</h1>
+                    <h1 class="fw-normal fs-5">Tiket :</h1>
                     <div class="d-flex justify-content-end align-items-end">
                         <h1 class="fw-normal fs-5 mt-2">{{ $pembeli->pesanan->jumlah_tiket }}</h1>
-                    </div>
-                </div>
-                <div class="harga-tiket d-flex align-items-center justify-content-between mt-4 mb-2">
-                    <h1 class="fw-normal fs-5">Payment URL</h1>
-                    <div class="d-flex justify-content-end align-items-end">
-                        <h1 class="fw-normal fs-5 mt-2">{{ $pembeli->pesanan->paymentUrl }}</h1>
                     </div>
                 </div>
                 <div>
                 </div>
                 <div class="harga-tiket d-flex align-items-center justify-content-between">
-                    <h1 class="fw-normal fs-5">Total Harga</h1>
+                    <h1 class="fw-normal fs-5">Total Harga :</h1>
                     <div class="d-flex justify-content-end align-items-end">
                         <h1 class="fw-normal fs-5 mt-2">Rp.
                             {{ number_format($pembeli->pesanan->jumlah_tiket * $pembeli->pesanan->harga, 0, ',', '.') }}
@@ -123,65 +117,5 @@
 
         </div>
 
-        {{-- <script type="text/javascript">
-            document.getElementById('pay-button').addEventListener('click', async function() {
-                // Membuat objek formData
-                var formData = new FormData();
-                formData.append('Tanggal Pesan', '{{ $pembeli->pesanan->tanggal }}');
-                formData.append('Jumlah Tiket', '{{ $pembeli->pesanan->jumlah_tiket }}');
-                formData.append('Nama', '{{ $pembeli->nama }}');
-                formData.append('Email', '{{ $pembeli->email }}');
-                formData.append('Kontak', '{{ $pembeli->nohp }}');
-
-                try {
-                    // Mengirim request ke route 'pembayaran'
-                    const response = await fetch("{{ route('pembayaran') }}", {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        }
-                    });
-
-                    // Mendapatkan token dari response
-                    const token = await response.text();
-
-                    // Memanggil fungsi Midtrans untuk memunculkan popup pembayaran
-                    window.snap.pay(token);
-                } catch (err) {
-                    console.error(err.message);
-                }
-            });
-        </script> --}}
-
-        {{-- <script type="text/javascript">
-            document.getElementById('pay-button').addEventListener('click', async function() {
-                try {
-                    const response = await fetch("{{ route('pembayaran') }}", {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            TanggalPesan: '{{ $pembeli->pesanan->tanggal }}',
-                            JumlahTiket: '{{ $pembeli->pesanan->jumlah_tiket }}',
-                            Nama: '{{ $pembeli->nama }}',
-                            Email: '{{ $pembeli->email }}',
-                            Kontak: '{{ $pembeli->nohp }}',
-                        })
-                    });
-
-                    const data = await response.json();
-                    if (data.token) {
-                        window.snap.pay(data.token);
-                    } else {
-                        console.error(data.error);
-                    }
-                } catch (err) {
-                    console.error(err.message);
-                }
-            });
-        </script> --}}
     </section>
 </x-layout>
