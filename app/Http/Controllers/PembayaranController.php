@@ -8,6 +8,7 @@ use App\Mail\TicketMail;
 use App\Models\Pembayaran;
 use App\Models\Pembeli;
 use App\Models\Pesanan;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -108,16 +109,16 @@ class PembayaranController extends Controller
     protected function generateAndSendTicket(Pembeli $pembeli)
     {
         // Load view for the ticket
-        // $pdf = PDF::loadView('tickets.ticket', compact('order'));
+        $pdf = PDF::loadView('tiket.cetak_tiket', compact('pembeli'));
 
-        // // Define file name and path
-        // $fileName = 'ticket_' . $pembeli->id . '.pdf';
-        // $filePath = storage_path('app/public/' . $fileName);
+        // Define file name and path
+        $fileName = 'ticket_' . $pembeli->id . '.pdf';
+        $filePath = storage_path('app/public/' . $fileName);
 
-        // // Save the PDF to the storage
-        // $pdf->save($filePath);
+        // Save the PDF to the storage
+        $pdf->save($filePath);
 
         // Send the ticket via email
-        Mail::to($pembeli->email)->send(new TicketMail($pembeli));
+        Mail::to($pembeli->email)->send(new TicketMail($pembeli, $filePath));
     }
 }

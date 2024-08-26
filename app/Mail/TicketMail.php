@@ -17,9 +17,10 @@ class TicketMail extends Mailable
     public $pembeli;
     public $filePath;
 
-    public function __construct(Pembeli $pembeli)
+    public function __construct(Pembeli $pembeli, $filePath)
     {
         $this->pembeli = $pembeli;
+        $this->filePath = $filePath;
     }
 
     public function build()
@@ -29,7 +30,8 @@ class TicketMail extends Mailable
         ->with([
             'pembeliNama' => $this->pembeli->nama,
             'pembeliIdPesanan' => $this->pembeli->id_pesanan,
-        ]);
+        ])
+        ->attach($this->filePath);
 
     }
 }

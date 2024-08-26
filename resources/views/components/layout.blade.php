@@ -12,12 +12,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
         rel="stylesheet">
     <link rel="icon" href="assets/images/vinyl-fill.svg" type="image/x-icon">
-
-    {{-- <!-- Midtrans -->
-    <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js"
-            data-client-key="{{ config('midtrans.client_key') }}">
-    </script> --}}
-
 </head>
 
 <body>
