@@ -30,6 +30,7 @@ Route::get('/profil', [ProfilController::class, 'index'])->name('profil');
 Route::get('/satwa', [SatwaController::class, 'index'])->name('satwa');
 Route::get('/peta', [PetaController::class, 'index'])->name('peta');
 Route::get('/kontak', [KontakController::class, 'index'])->name('kontak');
+Route::get('/detail-berita', [BeritaController::class, 'detailBerita'])->name('detail_berita');
 
 // Tiket
 

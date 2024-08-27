@@ -19,7 +19,7 @@
     <section class="container" style="margin-top: 100px;">
         <div class="row row-cols-1 row-cols-md-3 g-4">
             <div class="col">
-                <a href="detail_berita.php" class="text-decoration-none">
+                <a href="{{ route('detail_berita') }}" class="text-decoration-none">
                     <div class="card h-100">
                         <img src="assets/img/harimau.jpg" class="card-img-top w-100" alt="...">
                         <div class="card-body">
