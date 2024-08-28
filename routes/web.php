@@ -55,4 +55,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/home', [HomeController::class, 'index'])->name('home');
     Route::get('/admin/pesanan', [PesananController::class, 'index'])->name('pesanan');
     Route::get('/admin/pembeli/{id}', [PembeliController::class, 'index'])->name('pembeli');
+    
 });

@@ -121,4 +121,7 @@ class PembayaranController extends Controller
         // Send the ticket via email
         Mail::to($pembeli->email)->send(new TicketMail($pembeli, $filePath));
     }
+    
+
+    
 }

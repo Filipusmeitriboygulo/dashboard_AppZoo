@@ -1,9 +1,15 @@
-$(function () {
+document.addEventListener("DOMContentLoaded", function () {
+  
+
+
+
 
 
   // =====================================
   // Profit
   // =====================================
+
+
   var chart = {
     series: [
       { name: "Earnings this month:", data: [355, 390, 300, 350, 390, 180, 355, 390] },
@@ -57,7 +63,7 @@ $(function () {
 
     xaxis: {
       type: "category",
-      categories: ["16/08", "17/08", "18/08", "19/08", "20/08", "21/08", "22/08", "23/08"],
+      categories: ["23/08", "24/08", "25/08", "26/08", "27/08", "28/08", "29/08", "30/08"],
       labels: {
         style: { cssClass: "grey--text lighten-2--text fill-color" },
       },

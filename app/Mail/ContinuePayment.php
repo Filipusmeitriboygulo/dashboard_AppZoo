@@ -30,4 +30,5 @@ class ContinuePayment extends Mailable
                         'paymentUrl' => $this->paymentUrl,
                     ]);
     }
+    
 }
