@@ -49,11 +49,24 @@
                 <div class="card-body">
                     <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
                         <div class="mb-3 mb-sm-0">
-                            <h5 class="card-title fw-semibold">Penjualan Hari Ini</h5>
+                            <h5 class="card-title fw-semibold">Penjualan Minggu Ini</h5>
                         </div>
                         <div>
-                            <select class="form-select">
-                                <option value="4">Agustus 2024</option>
+                            <select class="form-select" id="monthSelect">
+                                @foreach ($months as $monthNumber => $monthName)
+                                    <option value="{{ $monthNumber }}"
+                                        {{ $monthNumber == $currentMonth ? 'selected' : '' }}>
+                                        {{ $monthName }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            <select class="form-select" id="yearSelect">
+                                @foreach ($years as $year)
+                                    <option value="{{ $year }}" {{ $year == $currentYear ? 'selected' : '' }}>
+                                        {{ $year }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -129,7 +142,6 @@
                                         <td class="border-bottom-0">
                                             <h6 class="fw-semibold mb-0 fs-4">Rp.
                                                 {{ number_format($pembeli->pesanan->jumlah_tiket * $pembeli->pesanan->harga, 0, ',', '.') }}
-
                                             </h6>
                                         </td>
                                     </tr>

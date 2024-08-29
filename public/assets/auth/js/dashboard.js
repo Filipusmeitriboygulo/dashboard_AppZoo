@@ -1,3 +1,34 @@
+// Tanggal
+document.addEventListener("DOMContentLoaded", function () {
+    const monthSelect = document.getElementById("monthSelect");
+    const yearSelect = document.getElementById("yearSelect");
+
+    function updateChart() {
+        const selectedMonth = monthSelect.value;
+        const selectedYear = yearSelect.value;
+
+        // Format tanggal untuk diproses atau dikirim ke server
+        const startDate = `${selectedYear}-${String(selectedMonth).padStart(
+            2,
+            "0"
+        )}-01`;
+        const endDate = new Date(selectedYear, selectedMonth, 0)
+            .toISOString()
+            .split("T")[0];
+
+        console.log("Start Date:", startDate);
+        console.log("End Date:", endDate);
+
+        // Kirim data ke server atau perbarui grafik berdasarkan tanggal yang dipilih
+    }
+
+    monthSelect.addEventListener("change", updateChart);
+    yearSelect.addEventListener("change", updateChart);
+
+    // Panggil fungsi untuk inisialisasi grafik atau data berdasarkan pilihan default
+    updateChart();
+});
+
 document.addEventListener("DOMContentLoaded", function () {
     var earnings = document
         .getElementById("earnings")
