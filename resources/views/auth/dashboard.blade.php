@@ -49,18 +49,17 @@
                 <div class="card-body">
                     <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
                         <div class="mb-3 mb-sm-0">
-                            <h5 class="card-title fw-semibold">Sales Overview</h5>
+                            <h5 class="card-title fw-semibold">Penjualan Hari Ini</h5>
                         </div>
                         <div>
                             <select class="form-select">
-                                <option value="1">May 2024</option>
-                                <option value="2">Juni 2024</option>
-                                <option value="3">Juli 2024</option>
                                 <option value="4">Agustus 2024</option>
                             </select>
                         </div>
                     </div>
                     <div id="chart"></div>
+                    <div id="earnings" data-json="{{ implode(', ', $earnings) }}"></div>
+                    <div id="categories" data-json="{{ implode(', ', $categories) }}"></div>
                 </div>
             </div>
         </div>
@@ -95,7 +94,7 @@
         <div class="col-lg-8 d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body p-4">
-                    <h5 class="card-title fw-semibold mb-4">Transactions Terbaru</h5>
+                    <h5 class="card-title fw-semibold mb-4">Transakasi Terbaru</h5>
                     <div class="table-responsive">
                         <table class="table text-nowrap mb-0 align-middle">
                             <thead class="text-dark fs-4">
@@ -130,6 +129,7 @@
                                         <td class="border-bottom-0">
                                             <h6 class="fw-semibold mb-0 fs-4">Rp.
                                                 {{ number_format($pembeli->pesanan->jumlah_tiket * $pembeli->pesanan->harga, 0, ',', '.') }}
+
                                             </h6>
                                         </td>
                                     </tr>
@@ -148,7 +148,4 @@
                 class="ms-2 pe-1 text-primary text-decoration-underline">B-ZOO</a></p>
     </div>
     </div>
-
-
-    {{-- Script --}}
 @endsection

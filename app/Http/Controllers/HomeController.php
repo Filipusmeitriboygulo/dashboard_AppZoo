@@ -42,13 +42,36 @@ class HomeController extends Controller
 
         // Mendapatkan data pesanan terbaru dengan relasi ke pembeli
         $recentTransactions = Pembeli::with('pesanan')
-        ->orderBy('created_at', 'desc')
-        ->take(5)
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        $pendapatanPerHari = Pesanan::with('pembeli')
+        ->selectRaw('DATE(pesanans.created_at) as tanggal, SUM(pesanans.harga * pesanans.jumlah_tiket) as total_pemasukan, SUM(pesanans.jumlah_tiket) as jumlah_tiket')
+        ->join('pembelis', 'pesanans.id', '=', 'pembelis.id_pesanan')
+        ->groupBy('tanggal')
         ->get();
 
+        $dataEarnings = $pendapatanPerHari->map(function ($item) {
+            return [
+                'date' => \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y'),
+                'earnings' => $item->total_pemasukan,
+            ];
+        });
 
-        return view('auth.dashboard', compact('totalPesanan', 'totalPembeli', 'totalPendapatanFormatted','totalJumlahTiket', 'recentTransactions'));
+        $categories = $dataEarnings->pluck('date')->toArray();
+        $earnings = $dataEarnings->pluck('earnings')->toArray();
+        // dd($categories,$earnings);
+
+        return view('auth.dashboard', compact(
+            'totalPesanan',
+            'totalPembeli',
+            'totalPendapatanFormatted',
+            'totalJumlahTiket',
+            'recentTransactions',
+            'categories',
+            'earnings'
+        ));
 
     }
-
 }
