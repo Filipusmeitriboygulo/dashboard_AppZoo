@@ -102,8 +102,9 @@
         </div>
         <div class="submit d-flex justify-content-end" style="margin-top: 70px;">
 
-            <form action="{{ route('pembayaran') }}" method="POST">
+            <!-- <form action="{{ route('pembayaran') }}" method="POST">
                 @csrf
+                @method('POST')
                 <div class="mb-3">
                     <input type="hidden" class="form-control" id="pembeli_id" name="pembeli_id"
                         value="{{ $pembeli->id }}" required>
@@ -112,10 +113,67 @@
                     <a href="{{ url('/detail-tiket/{pesananId}') }}"
                         class="text-decoration-none text-warning">Kembali</a>
                 </button>
-                <button type="submit" class="btn btn-outline-primary">Checkout</button>
+                <button type="submit" id="pay-button" class="btn btn-outline-primary">Checkout</button>
+            </form> -->
+
+            <button id="pay-button" class="btn btn-outline-primary">Checkout</button>
+
+            <form action="{{route('midtrans.callback')}}" id="submit_form" method="POST">
+                @csrf
+                <input type="hidden" name="json" id="json_callback">
             </form>
 
+            <script type="text/javascript">
+                document.getElementById('pay-button').onclick = function() {
+                    // alert('Button clicked'); // Untuk memastikan tombol ditekan
+
+                    // Kirim email sebelum pop-up Midtrans muncul
+                    $.ajax({
+                        url: "{{ route('send.email') }}",
+                        method: "POST",
+                        data: {
+                            pembeli_id: "{{ $pembeli->id }}",
+                            paymentUrl: "{{ $pembeli->paymentUrl->redirect_url }}",
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(response) {
+                            // alert('Email sent'); // Untuk memeriksa apakah email dikirim
+                            if (response.success) {
+                                // Jika email berhasil dikirim, munculkan pop-up Midtrans
+                                window.snap.pay('{{ $snapToken }}', {
+                                    onSuccess: function(result) {
+                                        alert("Payment success!");
+                                        console.log(result);
+                                        send_response_to_form(result);
+                                    },
+                                    onPending: function(result) {
+                                        alert("Waiting for your payment!");
+                                        console.log(result);
+                                        send_response_to_form(result);
+                                    },
+                                    onError: function(result) {
+                                        alert("Payment failed!");
+                                        console.log(result);
+                                        send_response_to_form(result);
+                                    },
+                                });
+                            } else {
+                                alert('Failed to send email. Please try again.');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            alert('An error occurred while sending email: ' + error);
+                        }
+                    });
+                };
+
+                function send_response_to_form(result){
+                    document.getElementById('json_callback').value = JSON.stringify(result);
+                    $('#submit_form').submit();
+                }
+            </script>
         </div>
+
 
     </section>
 </x-layout>

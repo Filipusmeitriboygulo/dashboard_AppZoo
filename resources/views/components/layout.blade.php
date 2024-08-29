@@ -13,10 +13,12 @@
         rel="stylesheet">
     <link rel="icon" href="assets/images/vinyl-fill.svg" type="image/x-icon">
 
-    {{-- <!-- Midtrans -->
+    <!-- Midtrans -->
     <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js"
-            data-client-key="{{ config('midtrans.client_key') }}">
-    </script> --}}
+        data-client-key="SB-Mid-client-9F7RXT61DEZygAi6">
+    </script>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
 </head>
 
@@ -51,7 +53,7 @@
         integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous">
     </script>
 
-    
+
 </body>
 
 </html>
