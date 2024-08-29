@@ -33,6 +33,12 @@
                             <td>
                                 <a class="btn btn-primary" href="{{ route('pembeli', $pesananItem->id) }}"
                                     role="button">View</a>
+                                <form action="{{ route('pesanan.hapus', $pesananItem->id) }}" method="POST"
+                                    style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
                             </td>
                         </tr>
                     @endforeach

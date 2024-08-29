@@ -27,4 +27,6 @@ class TiketController extends Controller
         return view('tiket.order', compact('pesananId', 'pembeliId','pembeli'));
     }
 
+    
+
 }

@@ -135,10 +135,10 @@
                                         <h6 class="fw-semibold mb-0">Id Pesanan</h6>
                                     </th>
                                     <th class="border-bottom-0">
-                                        <h6 class="fw-semibold mb-0">Buyer</h6>
+                                        <h6 class="fw-semibold mb-0">Nama</h6>
                                     </th>
                                     <th class="border-bottom-0">
-                                        <h6 class="fw-semibold mb-0">Date</h6>
+                                        <h6 class="fw-semibold mb-0">Tanggal</h6>
                                     </th>
                                     <th class="border-bottom-0">
                                         <h6 class="fw-semibold mb-0">Total</h6>

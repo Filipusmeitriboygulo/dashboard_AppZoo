@@ -10,6 +10,7 @@ use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\SatwaController;
 use App\Http\Controllers\PetaController;
 use App\Http\Controllers\KontakController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\TiketController;
 use App\Http\Controllers\PembeliController;
@@ -53,7 +54,13 @@ Auth::routes();
 // Dashboard Route
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/home', [HomeController::class, 'index'])->name('home');
+
+    // Admin Pesanan
     Route::get('/admin/pesanan', [PesananController::class, 'index'])->name('pesanan');
+    Route::delete('/admin/pesanan/{id}', [PesananController::class, 'hapus'])->name('pesanan.hapus');
+    Route::put('admin/pesanan/update/{id}', [PesananController::class, 'ubah'])->name('pesanan.ubah');
+
     Route::get('/admin/pembeli/{id}', [PembeliController::class, 'index'])->name('pembeli');
+    Route::get('/admin/laporan', [LaporanController::class, 'index'])->name('laporan');
     
 });

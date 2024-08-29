@@ -40,35 +40,18 @@ class PesananController extends Controller
         return redirect()->route('detail_tiket', ['pesananId' => $pesananId]);
     }
 
-    // public function store(){
-    //     $ticket = Ticket::findOrFail($ticketId);
-    //     $concert = $ticket->concert;
-    //     $order = null;
+    public function hapus($id) {
+        $pesanan = Pesanan::findOrFail($id);
+        $pesanan->delete();
+        return redirect()->route('pesanan')->with('success', 'Pesanan Berhasil Dihapus');
+    }
 
-    //     DB::transaction(function () use ($request, $ticket, &$order) {
-    //         // Create Order
-    //         $order = Order::create([
-    //             'email' => $request->input('email'),
-    //             'firstname' => $request->input('first_name'),
-    //             'lastname' => $request->input('last_name'),
-    //             'phone' => $request->input('phone'),
-    //             'total_price' => $ticket->price,
-    //             'status' => 'pending',
-    //         ]);
+    public function ubah(Request $request, $id)
+    {
+        $pesanan = Pesanan::findOrFail($id);
+        $pesanan->update($request->all());
+        return redirect()->route('pembeli', ['id' => $id])->with('success', 'Detail Pesanan berhasil diubah');
+    }
 
-    //         // Create Order Item
-    //         OrderItem::create([
-    //             'order_id' => $order->id,
-    //             'ticket_id' => $ticket->id,
-    //             'quantity' => 1,
-    //             'price' => $ticket->price,
-    //         ]);
-    //     });
 
-    //     if ($order) {
-    //         return $this->checkout($order, $request);
-    //     } else {
-    //         return response()->json(['error' => 'Order creation failed'], 500);
-    //     }
-    // }
 }
