@@ -52,22 +52,41 @@
                             <h5 class="card-title fw-semibold">Penjualan Minggu Ini</h5>
                         </div>
                         <div>
-                            <select class="form-select" id="monthSelect">
-                                @foreach ($months as $monthNumber => $monthName)
-                                    <option value="{{ $monthNumber }}"
-                                        {{ $monthNumber == $currentMonth ? 'selected' : '' }}>
-                                        {{ $monthName }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <form action="{{ route('home') }}" method="GET">
+                                <label for="period">Pilih Periode:</label>
+                                <select name="period" id="period" onchange="this.form.submit()">
+                                    <option value="week" {{ $selectedPeriod == 'week' ? 'selected' : '' }}>Minggu</option>
+                                    <option value="month" {{ $selectedPeriod == 'month' ? 'selected' : '' }}>Bulan</option>
+                                    <option value="year" {{ $selectedPeriod == 'year' ? 'selected' : '' }}>Tahun</option>
+                                </select>
 
-                            <select class="form-select" id="yearSelect">
-                                @foreach ($years as $year)
-                                    <option value="{{ $year }}" {{ $year == $currentYear ? 'selected' : '' }}>
-                                        {{ $year }}
-                                    </option>
-                                @endforeach
-                            </select>
+                                <label for="week">Pilih Minggu:</label>
+                                <select name="week" id="week" onchange="this.form.submit()"
+                                    {{ $selectedPeriod == 'week' ? '' : 'disabled' }}>
+                                    @foreach ($weeks as $key => $week)
+                                        <option value="{{ $key }}" {{ $selectedWeek == $key ? 'selected' : '' }}>
+                                            {{ $week }}</option>
+                                    @endforeach
+                                </select>
+
+                                <label for="month">Pilih Bulan:</label>
+                                <select name="month" id="month" onchange="this.form.submit()"
+                                    {{ $selectedPeriod == 'month' ? '' : 'disabled' }}>
+                                    @foreach ($months as $key => $month)
+                                        <option value="{{ $key }}"
+                                            {{ $selectedMonth == $key ? 'selected' : '' }}>{{ $month }}</option>
+                                    @endforeach
+                                </select>
+
+                                <label for="year">Pilih Tahun:</label>
+                                <select name="year" id="year" onchange="this.form.submit()">
+                                    @foreach ($years as $year)
+                                        <option value="{{ $year }}"
+                                            {{ $selectedYear == $year ? 'selected' : '' }}>{{ $year }}</option>
+                                    @endforeach
+                                </select>
+                            </form>
+
                         </div>
                     </div>
                     <div id="chart"></div>
