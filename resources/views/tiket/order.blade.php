@@ -54,12 +54,11 @@
     <!-- Akhir Menu -->
 
     <!-- Beli Tiket -->
-
     <section class="container mt-5">
         <div class="row row-cols-1 row-cols-md-2 g-4">
             <div class="col-lg-7 mt-2 mb-2 p-2 ps-3">
                 <h1 class="fw-semibold fs-3 text-uppercase">Detail Kontak </h1>
-                <p class="mt-5">
+                <p class="mt-5"> 
                     Nama Lengkap :
                 </p>
                 <p>
