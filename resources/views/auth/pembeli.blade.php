@@ -1,6 +1,6 @@
 @extends('layouts.auth');
 @section('content')
-    ;
+
 
     <div class="container">
         <h1>Detail Pesanan</h1>
