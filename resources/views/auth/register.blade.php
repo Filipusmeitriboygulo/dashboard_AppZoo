@@ -8,25 +8,27 @@
     <link rel="shortcut icon" type="image/png" href="{{ asset('assets/auth/images/logos/') }}" />
     <link rel="stylesheet" href="{{ asset('assets/auth/css/styles.min.css') }}" />
 </head>
-@extends('layouts.app')
-    <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
     data-sidebar-position="fixed" data-header-position="fixed">
-    <div class="position-relative overflow-hidden radial-gradient min-vh-100 d-flex align-items-center justify-content-center">
+    <div
+        class="position-relative overflow-hidden radial-gradient min-vh-100 d-flex align-items-center justify-content-center">
         <div class="d-flex align-items-center justify-content-center w-100">
             <div class="row justify-content-center w-100">
                 <div class="col-md-8 col-lg-6 col-xxl-3">
                     <div class="card mb-0">
                         <div class="card-body">
-                            <a href="{{ route('home') }}" class="text-nowrap logo-img text-center d-block py-3 w-100">
-                                <img src="{{ asset('assets/auth/images/logos/logo1.png') }}" width="80" alt="">
+                            <a href="{{ route('login') }}" class="text-nowrap logo-img text-center d-block py-3 w-100">
+                                <img src="{{ asset('assets/auth/images/logos/logo1.png') }}" width="80"
+                                    alt="">
                             </a>
                             <p class="text-center">B-ZOO | Kebun Binatang</p>
                             <form method="POST" action="{{ route('register') }}">
                                 @csrf
                                 <div class="mb-3">
                                     <label for="name" class="form-label">{{ __('Name') }}</label>
-                                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name"
-                                        name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                        id="name" name="name" value="{{ old('name') }}" required
+                                        autocomplete="name" autofocus>
                                     @error('name')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
@@ -35,8 +37,9 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="email" class="form-label">{{ __('Email Address') }}</label>
-                                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email"
-                                        name="email" value="{{ old('email') }}" required autocomplete="email">
+                                    <input type="email" class="form-control @error('email') is-invalid @enderror"
+                                        id="email" name="email" value="{{ old('email') }}" required
+                                        autocomplete="email">
                                     @error('email')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
@@ -54,12 +57,14 @@
                                     @enderror
                                 </div>
                                 <div class="mb-4">
-                                    <label for="password-confirm" class="form-label">{{ __('Confirm Password') }}</label>
+                                    <label for="password-confirm"
+                                        class="form-label">{{ __('Confirm Password') }}</label>
                                     <input type="password" class="form-control" id="password-confirm"
                                         name="password_confirmation" required autocomplete="new-password">
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between mb-4">
-                                    <a class="text-primary fw-bold" href="{{ route('password.request') }}">Forgot Password?</a>
+                                    <a class="text-primary fw-bold" href="{{ route('password.request') }}">Forgot
+                                        Password?</a>
                                 </div>
                                 <div class="row mb-0">
                                     <div class="col-md-12">
@@ -83,6 +88,5 @@
 
 
 
-    <script src="{{ asset('assets/auth/libs/jquery/dist/jquery.min.js') }}"></script>
-    <script src="{{ asset('assets/auth/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
-
+<script src="{{ asset('assets/auth/libs/jquery/dist/jquery.min.js') }}"></script>
+<script src="{{ asset('assets/auth/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>

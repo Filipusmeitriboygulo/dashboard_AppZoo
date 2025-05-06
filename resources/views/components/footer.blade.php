@@ -21,7 +21,7 @@
 
 <div class="mt-5">
 
-    <footer class="text-white text-center text-lg-start" style="background-color: #373A40;">
+    <footer class="text-white text-center text-lg-start sticky-bottom" style="background-color: #4146E6;">
         <!-- Grid container -->
         <div class=" container p-4">
             <!--Grid row-->
@@ -30,10 +30,10 @@
                 <div class="col-lg-4 col-md-12 mb-4 mb-md-0" style="font-size: small;">
                     <h4 class=" mb-4">Hubungi Kami</h4>
                     <p>
-                        Telp: 0274-373861
+                        Telp: 0852-7066-4532
                     </p>
                     <p>
-                        Lokasi : Jl. Medan - Banda Aceh
+                        Lokasi : Jl. Medan - Banda Aceh, BuketRata
                     </p>
 
                     <p>
@@ -41,7 +41,7 @@
 
                     </p>
                     <p>
-                        Email : info@gembiralokazoo.com
+                        Email : info@upabahasa.pnl.ac.id
                     </p>
 
                     <div class="mt-4">
@@ -94,12 +94,8 @@
                     <table class="table text-center text-white">
                         <tbody class="fw-normal">
                             <tr>
-                                <td>Monday - Friday:</td>
-                                <td>08:30 - 17:00</td>
-                            </tr>
-                            <tr>
-                                <td>Satuday - Sunday:</td>
-                                <td>08:00 - 18:00</td>
+                                <td>Senin - Jumat:</td>
+                                <td>07:30 - 17:00</td>
                             </tr>
                         </tbody>
                     </table>
@@ -111,10 +107,9 @@
         <!-- Grid container -->
 
         <!-- Copyright -->
-        <div class="text-end" style="background-color: #373A40; margin:0px 280px 0px 280px">
+        <div class="text-end " style="background-color: #4146E6; margin:0px 280px 0px 280px">
 
             <a class="text-white" href="https://heroic-pony-19f6e8.netlify.app/">
-                <img class="" src="{{ asset('assets/img/logo1.png ')}}" height="70px" width="70px" alt="" /></a>
         </div>
         <!-- Copyright -->
     </footer>
