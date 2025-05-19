@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>B-ZOO | Kebun Binatang</title>
+    <title>UPA-CLUSTER</title>
     <link rel="shortcut icon" type="image/png" href="{{ asset('assets/auth/images/logos/') }}" />
     <link rel="stylesheet" href="{{ asset('assets/auth/css/styles.min.css') }}" />
 </head>
@@ -18,10 +18,10 @@
                     <div class="card mb-0">
                         <div class="card-body">
                             <a href="{{ route('login') }}" class="text-nowrap logo-img text-center d-block py-3 w-100">
-                                <img src="{{ asset('assets/auth/images/logos/logo1.png') }}" width="80"
+                                <img src="{{ asset('assets/img/logo_cluster.png') }}" width="80"
                                     alt="">
                             </a>
-                            <p class="text-center">B-ZOO | Kebun Binatang</p>
+                            <p class="text-center">UPA-CLUSTER</p>
                             <form method="POST" action="{{ route('register') }}">
                                 @csrf
                                 <div class="mb-3">
@@ -63,8 +63,6 @@
                                         name="password_confirmation" required autocomplete="new-password">
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between mb-4">
-                                    <a class="text-primary fw-bold" href="{{ route('password.request') }}">Forgot
-                                        Password?</a>
                                 </div>
                                 <div class="row mb-0">
                                     <div class="col-md-12">

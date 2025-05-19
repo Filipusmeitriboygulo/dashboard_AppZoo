@@ -1,12 +1,11 @@
 <?php
 
-use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DataController;
-use App\Mail\PaymentStatusEmail;
-use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\KlasterisasiController;
+
 
 
 
@@ -19,4 +18,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/admin/home', [DataController::class, 'index'])->name('home');
     Route::post('/admin/data/upload', [DataController::class, 'upload'])->name('data.upload');
+    Route::get('/admin/klasterisasi', [KlasterisasiController::class, 'proses'])->name('klasterisasi');
+    Route::get('/admin/proses-klasterisasi', [KlasterisasiController::class, 'proses'])->name('proses-klasterisasi');
 });

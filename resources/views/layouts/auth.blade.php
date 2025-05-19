@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>B-ZOO | Kebun Binatang</title>
+    <title>UPA-CLUSTER</title>
     <link rel="shortcut icon" type="image/png" href="{{ asset('assets/auth/images/logos/') }}" />
     <link rel="stylesheet" href="{{ asset('assets/auth/css/styles.min.css') }}" />
 

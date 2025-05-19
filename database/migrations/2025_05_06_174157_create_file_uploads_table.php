@@ -13,11 +13,9 @@ return new class extends Migration
     {
         Schema::create('file_uploads', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('mime');
-            $table->unsignedBigInteger('size');
-            $table->binary('data'); // untuk menyimpan file sebagai BLOB
             $table->timestamps();
+            $table->unsignedBigInteger('user_id')->after('id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('file_uploads');
     }
 };
