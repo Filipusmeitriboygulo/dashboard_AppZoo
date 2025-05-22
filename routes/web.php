@@ -20,4 +20,5 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/data/upload', [DataController::class, 'upload'])->name('data.upload');
     Route::get('/admin/klasterisasi', [KlasterisasiController::class, 'proses'])->name('klasterisasi');
     Route::get('/admin/proses-klasterisasi', [KlasterisasiController::class, 'proses'])->name('proses-klasterisasi');
+    Route::post('/klasterisasi/analyze', [KlasterisasiController::class, 'analyze'])->name('klasterisasi.analyze');
 });

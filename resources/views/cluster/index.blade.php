@@ -10,7 +10,8 @@
                       SELAMAT DATANG DI
                   </h2>
                   <h1 style="font-weight: 700; line-height: 1.2; font-size:40px">
-                      Sistem Klasterisasi <br> Nilai TOEFL <br> UPA Bahasa <br> Politeknik Negeri Lhokseumawe
+                      Sistem Klasterisasi Menggunakan Algoritma Fuzzy C-Means <br> Nilai TOEFL <br> UPA Bahasa <br>
+                      Politeknik Negeri Lhokseumawe
                   </h1>
 
               </div>
@@ -39,23 +40,22 @@
               <div class="col-lg-8 px-0 pe-lg-3 pe-0 pt-2">
                   <div class="card">
                       <div class="card-img">
-                          <h1 class="card-title p-3">SISTEM KLASTERISASI UPA BAHASA</h1>
+                          <h3 class="card-title p-3">SISTEM KLASTERISASI NILAI TOEFL BERBASIS FUZZY C-MEANS </h3>
                           <p style="margin: 20px; text-align: justify;">
                               Politeknik Negeri Lhokseumawe telah mengembangkan sistem analisis berbasis Fuzzy C-Means
                               untuk memetakan kemampuan bahasa Inggris mahasiswa melalui nilai TOEFL. Dengan teknik
                               klasterisasi ini, kami mampu mengelompokkan mahasiswa berdasarkan pola kemahiran di tiga
                               aspek utama: Listening, Structure, dan Reading.
-                              Sistem ini membantu UPA Bahasa untuk:
-                              Merancang remedial teaching yang tepat sasaran
-                              Mengoptimalkan alokasi materi pembelajaran
-                              Memprediksi kesiapan mahasiswa menghadapi tes TOEFL resmi
-                              Dengan error rate hanya 0,005, metode ini terbukti efektif meningkatkan akurasi pemetaan
-                              kompetensi bahasa Inggris dibanding teknik konvensional. Inovasi ini menjadi bagian dari
-                              komitmen kami dalam menjawab tantangan Merdeka Belajar di era digital.
-                              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Molestias, nostrum.
-                              Lorem ipsum dolor sit amet consectetur adipisicing elit. Magni enim reprehenderit facere
-                              eaque nesciunt vel, iste laudantium. At, vel commodi!
-
+                              <br>Sistem ini membantu UPA Bahasa untuk:
+                          <ul>
+                              <li>Membantu dan memudahkan UPA Bahasa Politeknik Negeri Lhokseumawe dalam merancang
+                                  kegiatan
+                                  peningkatan bahasa Inggris berdasarkan klasterisasi nilai TOEFL mahasiswa</li>.
+                              <li>
+                                  Membantu Jurusan yang ada di Politeknik Negeri Lhokseumawe mengidentifikasi pola
+                                  distribusi Nilai TOEFL mahasiswa .
+                              </li>
+                          </ul>
                           </p>
                       </div>
 
@@ -64,13 +64,17 @@
               <div class="col-lg-4 px-0 ps-lg-3 ps-0 pt-2">
                   <div class="card">
                       <div class="card-img">
-                          <h1 class="card-title p-3">FUZZY C-MEANS</h1>
-                          <p p style="margin: 20px; text-align: justify;">
-                              Lorem ipsum dolor sit amet consectetur adipisicing elit. Cupiditate odit consequuntur
-                              Fuzzy C-Means Clustering (FCM), yang juga dikenal sebagai Fuzzy Isodata, adalah salah satu
-                              teknik pengelompokan yang termasuk dalam kelompok metode Hard K-Means. FCM menggunakan
-                              pendekatan pengelompokan fuzzy, memungkinkan data menjadi anggota dari seluruh kelas atau
-                              cluster yang terbentuk dengan derajat keanggotaan berkisar antara 0 hingga 1.
+                          <h3 class="card-title p-3">FUZZY C-MEANS</h3>
+                          <p style="margin: 20px; text-align: justify;">
+                              Fuzzy C-Means adalah teknik pengelompokan
+                              data dimana keberadaan tiap-tiap titik data dalam
+                              suatu cluster ditentukan oleh derajat keanggotaan.
+                              Fuzzy C-Means adalah algoritma pengelompokan
+                              yang terawasi, karena pada algoritma ini jumlah
+                              cluster yang akan dibentuk perlu diketahui terlebih
+                              dahulu. konsep dasarnya adalah menentukan pusat
+                              kelompok yang akan menandai lokasi rata-rata
+                              untuk tiap-tiap cluster
                           </p>
                       </div>
                   </div>
