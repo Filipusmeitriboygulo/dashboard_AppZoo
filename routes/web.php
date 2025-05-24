@@ -16,9 +16,9 @@ Auth::routes();
 // Dashboard Route
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/admin/home', [DataController::class, 'index'])->name('home');
-    Route::post('/admin/data/upload', [DataController::class, 'upload'])->name('data.upload');
-    Route::get('/admin/klasterisasi', [KlasterisasiController::class, 'proses'])->name('klasterisasi');
-    Route::get('/admin/proses-klasterisasi', [KlasterisasiController::class, 'proses'])->name('proses-klasterisasi');
+    Route::get('/home', [DataController::class, 'index'])->name('home');
+    Route::post('/data/upload', [DataController::class, 'upload'])->name('data.upload');
+    Route::get('/klasterisasi', [KlasterisasiController::class, 'index'])->name('klasterisasi.index');
     Route::post('/klasterisasi/analyze', [KlasterisasiController::class, 'analyze'])->name('klasterisasi.analyze');
+    Route::get('/klasterisasi/hasil', [KlasterisasiController::class, 'result'])->name('klasterisasi.result');
 });

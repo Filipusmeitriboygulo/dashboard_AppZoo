@@ -19,7 +19,7 @@
                                         <label for="fileInput" class="btn btn-primary">
                                             Pilih File
                                         </label>
-                                        <input type="file" name="file" id="fileInput" class="file-input" multiple>
+                                        <input type="file" name="file" id="fileInput" class="file-input" accept=".csv,.txt,.xlsx">
                                     </div>
                                 </div>
 
@@ -29,19 +29,11 @@
                                     <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0"
                                         aria-valuemin="0" aria-valuemax="100">0%</div>
                                 </div>
-
-                                <div class="alert alert-success mt-3" id="upload-success" style="display: none;">
-                                    File berhasil diupload!
-                                </div>
-
-                                <div class="alert alert-danger mt-3" id="upload-error" style="display: none;">
-                                    Terjadi kesalahan saat upload file.
-                                </div>
                             </div>
 
                             <div class="form-group mt-3">
                                 <button type="submit" class="btn btn-success" id="upload-button" enabled>
-                                    Upload
+                                    <i class="fa fa-upload mr-2"></i> Upload
                                 </button>
                             </div>
                         </form>
@@ -85,11 +77,15 @@
         .file-item .file-name {
             flex-grow: 1;
             margin-right: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .file-item .file-size {
             color: #6c757d;
             margin-right: 10px;
+            font-size: 0.9em;
         }
 
         .file-item .file-remove {
@@ -113,8 +109,6 @@
             const uploadForm = document.getElementById('upload-form');
             const progressBar = document.querySelector('.progress-bar');
             const progress = document.querySelector('.progress');
-            const uploadSuccess = document.getElementById('upload-success');
-            const uploadError = document.getElementById('upload-error');
 
             // Prevent default drag behaviors
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -174,6 +168,8 @@
                 if (files.length > 0) {
                     uploadButton.disabled = false;
                     updateFileList(files);
+                } else {
+                    uploadButton.disabled = true;
                 }
             }
 
@@ -198,7 +194,8 @@
                     fileRemove.addEventListener('click', function(e) {
                         e.stopPropagation();
                         fileItem.remove();
-
+                        fileInput.value = '';
+                        
                         // Check if there are no more files
                         if (fileList.children.length === 0) {
                             uploadButton.disabled = true;
@@ -222,90 +219,82 @@
                 return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
             }
 
-            function handleSubmit(e) {
+            async function handleSubmit(e) {
                 e.preventDefault();
-
-                // Reset alerts
-                uploadSuccess.style.display = 'none';
-                uploadError.style.display = 'none';
-
-                const formData = new FormData(uploadForm);
-                const files = fileInput.files;
-
-                if (files.length === 0) {
-                    uploadError.style.display = 'block';
-                    uploadError.textContent = 'Silakan pilih file terlebih dahulu.';
-                    return;
-                }
 
                 // Show progress bar
                 progress.style.display = 'block';
                 progressBar.style.width = '0%';
                 progressBar.textContent = '0%';
 
-                // AJAX upload
-                const xhr = new XMLHttpRequest();
+                const formData = new FormData(uploadForm);
+                const files = fileInput.files;
 
-                xhr.upload.addEventListener('progress', function(e) {
-                    if (e.lengthComputable) {
-                        const percentComplete = Math.round((e.loaded / e.total) * 100);
-                        progressBar.style.width = percentComplete + '%';
-                        progressBar.textContent = percentComplete + '%';
-                    }
-                }, false);
+                if (files.length === 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Silakan pilih file terlebih dahulu!',
+                    });
+                    progress.style.display = 'none';
+                    return;
+                }
 
-                xhr.addEventListener('load', function() {
-                    if (xhr.status === 200) {
-                        const response = JSON.parse(xhr.responseText);
-
-                        if (response.success) {
-                            uploadSuccess.style.display = 'block';
-                            uploadSuccess.textContent = response.message;
-                            fileInput.value = '';
-                            fileList.innerHTML = '';
-                            uploadButton.disabled = true;
-                        } else {
-                            uploadError.style.display = 'block';
-                            uploadError.textContent = response.message;
+                try {
+                    const response = await axios.post(uploadForm.action, formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        onUploadProgress: function(progressEvent) {
+                            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                            progressBar.style.width = percentCompleted + '%';
+                            progressBar.textContent = percentCompleted + '%';
                         }
+                    });
+
+                    if (response.data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: response.data.message || 'File berhasil diupload!',
+                            timer: 3000
+                        });
+                        
+                        // Reset form
+                        fileInput.value = '';
+                        fileList.innerHTML = '';
+                        uploadButton.disabled = true;
                     } else {
-                        uploadError.style.display = 'block';
-                        uploadError.textContent = 'Terjadi kesalahan saat mengupload file.';
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: response.data.message || 'Terjadi kesalahan saat mengupload file',
+                        });
+                    }
+                } catch (error) {
+                    let errorMessage = 'Terjadi kesalahan saat mengupload file';
+                    
+                    if (error.response) {
+                        if (error.response.data.message) {
+                            errorMessage = error.response.data.message;
+                        } else if (error.response.data.errors) {
+                            errorMessage = Object.values(error.response.data.errors).join('<br>');
+                        }
+                    } else if (error.request) {
+                        errorMessage = 'Tidak ada respon dari server';
                     }
 
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        html: errorMessage,
+                    });
+                } finally {
                     setTimeout(() => {
                         progress.style.display = 'none';
                     }, 1000);
-                });
-
-                xhr.addEventListener('error', function() {
-                    uploadError.style.display = 'block';
-                    uploadError.textContent = 'Terjadi kesalahan jaringan.';
-                    progress.style.display = 'none';
-                });
-
-                xhr.open('POST', uploadForm.action, true);
-                xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').content);
-                xhr.send(formData);
-            }
-
-            function simulateProgress() {
-                let width = 0;
-                const interval = setInterval(() => {
-                    if (width >= 100) {
-                        clearInterval(interval);
-                    } else {
-                        width += 5;
-                        progressBar.style.width = width + '%';
-                        progressBar.textContent = width + '%';
-
-                        if (width >= 100) {
-                            setTimeout(() => {
-                                progress.style.display = 'none';
-                            }, 500);
-                        }
-                    }
-                }, 50);
+                }
             }
         });
     </script>

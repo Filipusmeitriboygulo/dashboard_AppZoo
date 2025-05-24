@@ -93,7 +93,7 @@ class DataController extends Controller
     {
         // Validasi
         $validator = Validator::make($request->all(), [
-            'file' => 'required|file|mimes:csv,txt|max:5120' // Hanya terima 1 file (max 5MB)
+            'file' => 'required|file|mimes:csv,txt,xlsx|max:10240' // Hanya terima 1 file (max 5MB)
         ], [
             'file.required' => 'File harus diisi',
             'file.file' => 'Input harus berupa file',
