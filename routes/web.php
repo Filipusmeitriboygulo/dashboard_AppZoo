@@ -16,7 +16,7 @@ Auth::routes();
 // Dashboard Route
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/home', [DataController::class, 'index'])->name('home');
+    Route::get('/admin/home', [DataController::class, 'index'])->name('home');
     Route::post('/data/upload', [DataController::class, 'upload'])->name('data.upload');
     Route::get('/klasterisasi', [KlasterisasiController::class, 'index'])->name('klasterisasi.index');
     Route::post('/klasterisasi/analyze', [KlasterisasiController::class, 'analyze'])->name('klasterisasi.analyze');
