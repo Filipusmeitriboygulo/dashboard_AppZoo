@@ -20,5 +20,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/data/upload', [DataController::class, 'upload'])->name('data.upload');
     Route::get('/klasterisasi', [KlasterisasiController::class, 'index'])->name('klasterisasi.index');
     Route::post('/klasterisasi/analyze', [KlasterisasiController::class, 'analyze'])->name('klasterisasi.analyze');
-    Route::get('/klasterisasi/hasil', [KlasterisasiController::class, 'result'])->name('klasterisasi.result');
+    Route::get('/klasterisasi/result', [KlasterisasiController::class, 'result'])->name('klasterisasi.result');
+});
+
+Route::get('/session-test', function () {
+    session(['foo' => 'bar']);
+    return redirect('/session-check');
+});
+
+Route::get('/session-check', function () {
+    return session('foo') ?? 'session kosong';
 });
