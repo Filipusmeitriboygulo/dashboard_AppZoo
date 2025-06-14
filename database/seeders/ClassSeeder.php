@@ -12,12 +12,12 @@ class ClassSeeder extends Seeder
     {
         $studyPrograms = StudyProgram::all();
         $academicYears = ['2022/2023', '2023/2024'];
-        $semesters = [1, 2, 3, 4, 5, 6];
+        $semesters= [1, 2, 3, 4];
 
         foreach ($studyPrograms as $program) {
             foreach ($academicYears as $year) {
                 foreach ($semesters as $semester) {
-                    $className = $program->code . '-' . $semester . 'A';
+                    $className = $program->code . '-' . $semester . 'A' ;
 
                     ClassModel::create([
                         'study_program_id' => $program->id,

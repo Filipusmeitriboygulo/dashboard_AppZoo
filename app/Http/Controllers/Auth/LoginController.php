@@ -28,7 +28,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/admin/home';
+    // protected $redirectTo = '/admin/home';
 
     /**
      * Create a new controller instance.
@@ -55,7 +55,7 @@ class LoginController extends Controller
         // Redirect based on role
         switch ($user->role) {
             case 'admin':
-                return '/admin/dashboard';
+                return '/admin/home';
             case 'kepala_upa':
                 return '/kepala-upa/dashboard';
             case 'ketua_jurusan':
@@ -65,7 +65,7 @@ class LoginController extends Controller
             case 'wakil_direktur':
                 return '/wakil-direktur/dashboard';
             default:
-                return '/dashboard';
+                return '/';
         }
     }
 

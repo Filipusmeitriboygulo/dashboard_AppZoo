@@ -16,7 +16,7 @@
 
                         {{ __('You are logged in!') }}
                     </div>
-                    @include('auth.data')
+                    @include('admin/data-upload/index')
                 </div>
             </div>
         </div>

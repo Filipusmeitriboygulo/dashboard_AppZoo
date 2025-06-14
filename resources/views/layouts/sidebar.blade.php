@@ -23,7 +23,7 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="{{ route('klasterisasi.index') }}" aria-expanded="false">
+                            <a class="sidebar-link" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-article"></i>
                                 </span>
@@ -31,7 +31,7 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="{{ route('klasterisasi.result') }}" aria-expanded="false">
+                            <a class="sidebar-link"  aria-expanded="false">
                                 <span>
                                     <i class="ti ti-cards"></i>
                                 </span>
@@ -39,7 +39,7 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="./ui-typography.html" aria-expanded="false">
+                            <a class="sidebar-link"  aria-expanded="false">
                                 <span>
                                     <i class="ti ti-file-description"></i>
                                 </span>

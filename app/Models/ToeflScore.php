@@ -41,8 +41,8 @@ class ToeflScore extends Model
 
     public function getScoreGradeAttribute()
     {
-        if ($this->total_score >= 550) return 'Tinggi';
-        if ($this->total_score >= 450) return 'Sedang';
-        return 'Rendah';
+        if ($this->total_score >= 550) return 'Mahir';
+        if ($this->total_score >= 450) return 'Menengah';
+        return 'Pemula';
     }
 }
