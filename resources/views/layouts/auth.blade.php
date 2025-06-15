@@ -7,6 +7,8 @@
     <title>UPA-CLUSTER</title>
     <link rel="shortcut icon" type="image/png" href="{{ asset('assets/auth/images/logos/') }}" />
     <link rel="stylesheet" href="{{ asset('assets/auth/css/styles.min.css') }}" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    @stack('styles')
 
 
 </head>
@@ -29,14 +31,13 @@
             </div>
         </div>
         <script src="{{ asset('assets/auth/libs/jquery/dist/jquery.min.js') }}"></script>
-        <script src="{{ asset('assets/auth/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
         <script src="{{ asset('assets/auth/js/sidebarmenu.js') }}"></script>
         <script src="{{ asset('assets/auth/js/app.min.js') }}"></script>
         <script src="{{ asset('assets/auth/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
         <script src="{{ asset('assets/auth/libs/simplebar/dist/simplebar.js') }}"></script>
         <script src="{{ asset('assets/auth/js/dashboard.js') }}"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+        @stack('scripts')  
 </body>
 
 </html>
