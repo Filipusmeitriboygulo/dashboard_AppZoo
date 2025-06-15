@@ -302,37 +302,6 @@
             uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
             progressDiv.style.display = 'block';
 
-            // try {
-            //     const response = await fetch('{{ route('admin.data-upload.upload') }}', {
-            //         method: 'POST',
-            //         body: formData,
-            //         headers: {
-            //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-            //                 'content')
-            //         }
-            //     });
-
-            //     const result = await response.json();
-
-            //     if (result.success) {
-            //         currentBatchId = result.batch_id;
-            //         currentFilePath = result.file_path;
-            //         currentFileType = result.file_type;
-
-            //         // Hide upload modal and show preview
-            //         bootstrap.Modal.getInstance(document.getElementById('uploadModal')).hide();
-            //         showPreview(result.preview);
-            //     } else {
-            //         alert('Upload failed: ' + result.message);
-            //     }
-            // } catch (error) {
-            //     alert('Upload failed: ' + error.message);
-            // } finally {
-            //     uploadBtn.disabled = false;
-            //     uploadBtn.innerHTML = 'Upload & Preview';
-            //     progressDiv.style.display = 'none';
-            // }
-
             try {
                 const response = await fetch('http://127.0.0.1:8000/admin/data-upload/upload', {
                     method: 'POST',
