@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Carbon\Carbon;
 
@@ -79,34 +80,58 @@ class ExcelProcessingService
         try {
             $spreadsheet = IOFactory::load($fullPath);
             $worksheet = $spreadsheet->getActiveSheet();
-            $data = $worksheet->toArray();
-            $dataRows = $this->filterEmptyRows($data);
-            // Gunakan fungsi filter yang sudah diperbaiki
-            $filteredData = $this->filterEmptyRows($data);
+            $dataRows = $worksheet->toArray();
+            $dataRows = $this->filterEmptyRows($dataRows);
 
-            // Pastikan data tidak kosong
-            if (empty($filteredData)) {
-                throw new \Exception("File Excel tidak mengandung data valid");
+            if (empty($dataRows)) {
+                throw new \Exception("File Excel kosong/tidak valid");
             }
 
-            // Ambil baris pertama sebagai header (tanpa validasi)
-            $headers = array_shift($data) ?? [];
-
-            // Format header untuk display
-            $displayHeaders = array_map(function ($header, $index) {
-                return trim($header) ?: 'Kolom ' . ($index + 1);
-            }, $headers, array_keys($headers));
-
-            // Proses sample rows (10 baris pertama untuk preview)
+            // Ambil 10 baris pertama (tanpa header)
             $sampleRows = array_slice($dataRows, 0, 10);
-            $processedRows = [];
+
+            return [
+                'file_type' => 'excel',
+                'headers' => [], // Kosongkan header
+                'total_rows' => count($dataRows),
+                'sample_rows' => array_map(function ($row) {
+                    return [
+                        'original' => $row,
+                        'processed' => $row
+                    ];
+                }, $sampleRows),
+                'preview_count' => count($sampleRows),
+                'has_errors' => false,
+                'errors' => [],
+                'scope_info' => $this->getScopeInfo($scope, $scopeId),
+                'header_row_index' => null // Tidak ada header
+            ];
+        } catch (\Exception $e) {
+            throw new \Exception('Gagal membaca Excel: ' . $e->getMessage());
+        }
+    }
+
+    protected function processExcel($fullPath, $scope, $scopeId, $batchId, $uploadedBy)
+    {
+        try {
+            $spreadsheet = IOFactory::load($fullPath);
+            $worksheet = $spreadsheet->getActiveSheet();
+            $dataRows = $worksheet->toArray();
+
+            // Filter baris kosong
+            $dataRows = $this->filterEmptyRows($dataRows);
+
+            if (empty($dataRows)) {
+                throw new \Exception("File Excel kosong/tidak valid");
+            }
+
+            $successCount = 0;
+            $errorCount = 0;
             $errors = [];
 
-            foreach ($sampleRows as $index => $row) {
-                $rowNumber = $index + 2; // +2 karena header di baris 1 dan array mulai 0
-
+            foreach ($dataRows as $row) {
                 try {
-                    // Asumsikan urutan kolom default
+                    // Proses langsung tanpa validasi
                     $processedData = [
                         'no' => $row[0] ?? null,
                         'nama' => $row[1] ?? null,
@@ -114,116 +139,38 @@ class ExcelProcessingService
                         'nilai_toefl' => $row[3] ?? null
                     ];
 
-                    // Validasi data minimal (tanpa validasi header)
-                    $rowErrors = [];
-
-                    if (empty($processedData['nama'])) {
-                        $rowErrors[] = "Baris {$rowNumber}: Kolom nama tidak boleh kosong";
+                    // Gabungkan dengan data jurusan/kelas jika parseJurKlsProdi masih diperlukan
+                    if (method_exists($this, 'parseJurKlsProdi')) {
+                        $jurKlsProdiData = $this->parseJurKlsProdi($row[2] ?? '');
+                        $processedData = array_merge($processedData, $jurKlsProdiData);
                     }
 
-                    if (isset($processedData['nilai_toefl']) && !is_numeric($processedData['nilai_toefl'])) {
-                        $rowErrors[] = "Baris {$rowNumber}: Kolom nilai TOEFL harus berupa angka";
-                    }
+                    // Simpan ke database
+                    $this->saveStudentAndScore(
+                        $processedData,
+                        $scope,
+                        $scopeId,
+                        $batchId,
+                        $uploadedBy
+                    );
 
-                    $processedRows[] = [
-                        'original' => $this->formatRowForDisplay($row, $headers),
-                        'processed' => $processedData,
-                        'errors' => $rowErrors
-                    ];
-
-                    $errors = array_merge($errors, $rowErrors);
+                    $successCount++;
                 } catch (\Exception $e) {
-                    $errors[] = "Baris {$rowNumber}: " . $e->getMessage();
-                    $processedRows[] = [
-                        'original' => $this->formatRowForDisplay($row, $headers),
-                        'processed' => null,
-                        'errors' => [$e->getMessage()]
-                    ];
+                    $errorCount++;
+                    $errors[] = "Gagal memproses baris: " . $e->getMessage();
                 }
             }
 
             return [
-                'file_type' => 'excel',
-                'headers' => $displayHeaders,
                 'total_rows' => count($dataRows),
-                'sample_rows' => $processedRows,
-                'preview_count' => count($sampleRows),
-                'has_errors' => !empty($errors),
+                'success_count' => $successCount,
+                'error_count' => $errorCount,
                 'errors' => $errors,
-                'scope_info' => $this->getScopeInfo($scope, $scopeId),
-                'header_row_index' => 0 // Selalu asumsikan header di baris pertama
+                'batch_id' => $batchId
             ];
         } catch (\Exception $e) {
-            throw new \Exception('Error reading Excel file: ' . $e->getMessage());
+            throw new \Exception('Gagal memproses file Excel: ' . $e->getMessage());
         }
-    }
-
-    protected function processExcel($fullPath, $scope, $scopeId, $batchId, $uploadedBy)
-    {
-        $spreadsheet = IOFactory::load($fullPath);
-        $worksheet = $spreadsheet->getActiveSheet();
-        $data = $worksheet->toArray();
-
-        $dataRows = $this->filterEmptyRows($data);
-        // Gunakan fungsi filter yang sudah diperbaiki
-        $filteredData = $this->filterEmptyRows($data);
-
-        // Pastikan data tidak kosong
-        if (empty($filteredData)) {
-            throw new \Exception("File Excel tidak mengandung data valid");
-        }
-
-        // Ambil baris pertama sebagai header (tanpa validasi)
-        $headers = array_shift($data);
-
-        $successCount = 0;
-        $errorCount = 0;
-        $errors = [];
-
-        foreach ($dataRows as $index => $row) {
-            $rowNumber = $index + 2; // +2 karena header di baris 1 dan array mulai 0
-
-            try {
-                // Asumsikan urutan kolom default
-                $jurKlsProdiData = $this->parseJurKlsProdi($row[2] ?? '');
-                $processedData = array_merge([
-                    'no' => $row[0] ?? null,
-                    'nama' => $row[1] ?? null,
-                    'jur_kls_prodi' => $row[2] ?? null,
-                    'nilai_toefl' => $row[3] ?? null
-                ], $jurKlsProdiData);
-
-                // Validasi minimal langsung di sini
-                if (empty($processedData['nama'])) {
-                    throw new \Exception("Kolom nama tidak boleh kosong");
-                }
-
-                if (!is_numeric($processedData['nilai_toefl'])) {
-                    throw new \Exception("Kolom nilai TOEFL harus berupa angka");
-                }
-
-                $this->saveStudentAndScore(
-                    $processedData,
-                    $scope,
-                    $scopeId,
-                    $batchId,
-                    $uploadedBy
-                );
-
-                $successCount++;
-            } catch (\Exception $e) {
-                $errorCount++;
-                $errors[] = "Baris {$rowNumber}: " . $e->getMessage();
-            }
-        }
-
-        return [
-            'total_rows' => count($dataRows),
-            'success_count' => $successCount,
-            'error_count' => $errorCount,
-            'errors' => $errors,
-            'batch_id' => $batchId
-        ];
     }
 
     protected function parseJurKlsProdi($jurKlsProdi)
@@ -436,66 +383,65 @@ class ExcelProcessingService
 
     protected function saveStudentAndScore($data, $scope, $scopeId, $batchId, $uploadedBy)
     {
-        // Generate NIM jika tidak ada
-        $nim = $data['nim'] ?? $this->generateNIM($data, $batchId);
+        try {
+            DB::beginTransaction();
 
-        // Temukan atau buat student
-        $student = Student::where('student_id', $nim)->first();
+            // 1. Handle Student Data
+            $nim = $data['nim'] ?? $this->generateNIM($data, $batchId);
 
-        if (!$student) {
-            // Parse jurusan/kelas/prodi
-            $jurKlsProdi = $this->parseJurKlsProdi($data['jur_kls_prodi'] ?? '');
+            $student = Student::firstOrCreate(
+                ['student_id' => $nim],
+                [
+                    'name' => $data['nama'] ?? 'Unknown',
+                    'class_id' => $this->resolveClassInfo($data, $scope, $scopeId)['class_id'],
+                    'study_program_id' => $this->resolveClassInfo($data, $scope, $scopeId)['study_program_id'],
+                    'department_id' => $this->resolveClassInfo($data, $scope, $scopeId)['department_id'],
+                    'no' => $data['no'] ?? null,
+                ]
+            );
 
-            // Dapatkan info kelas (sesuaikan dengan method determineClassInfo Anda)
-            $classInfo = $this->determineClassInfo([
-                'kode_jurusan' => $jurKlsProdi['kode_jurusan'] ?? null,
-                'kode_prodi' => $jurKlsProdi['kode_prodi'] ?? null,
-                'kelas' => $jurKlsProdi['kelas'] ?? null
-            ], $scope, $scopeId);
+            // 2. Handle TOEFL Score
+            $scoreData = [
+                'student_id' => $student->id,
+                'total_score' => $data['nilai_toefl'] ?? 0,
+                'dataset_batch' => $batchId,
+                'uploaded_by' => $uploadedBy,
+                'test_date' => $data['tanggal_test'] ?? now()->format('Y-m-d'),
+                'listening_score' => $data['listening'] ?? null,
+                'structure_score' => $data['structure'] ?? null,
+                'reading_score' => $data['reading'] ?? null,
+            ];
 
-            $student = Student::create([
-                'student_id' => $nim,
-                'name' => $data['nama'],
-                'class_id' => $classInfo['class_id'],
-                'study_program_id' => $classInfo['study_program_id'],
-                'department_id' => $classInfo['department_id'],
-                'no' => $data['no'] ?? null, // Jika ada kolom no
-            ]);
-        }
+            ToeflScore::updateOrCreate(
+                [
+                    'student_id' => $student->id,
+                    'test_date' => $scoreData['test_date']
+                ],
+                $scoreData
+            );
 
-        // Persiapkan data skor TOEFL
-        $scoreData = [
-            'total_score' => $data['nilai_toefl'],
-            'dataset_batch' => $batchId,
-            'uploaded_by' => $uploadedBy,
-            'test_date' => $data['tanggal_test'] ?? now()->format('Y-m-d'),
-        ];
+            DB::commit();
 
-        // Jika ada nilai section (opsional)
-        if (isset($data['listening'])) {
-            $scoreData['listening_score'] = $data['listening'];
-        }
-        if (isset($data['structure'])) {
-            $scoreData['structure_score'] = $data['structure'];
-        }
-        if (isset($data['reading'])) {
-            $scoreData['reading_score'] = $data['reading'];
-        }
-
-        // Cek apakah skor sudah ada
-        $existingScore = ToeflScore::where('student_id', $student->id)
-            ->where('test_date', $scoreData['test_date'])
-            ->first();
-
-        if ($existingScore) {
-            $existingScore->update($scoreData);
-        } else {
-            ToeflScore::create(array_merge($scoreData, [
-                'student_id' => $student->id
-            ]));
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Failed to save student and score: " . $e->getMessage());
+            return false;
         }
     }
 
+    protected function resolveClassInfo($data, $scope, $scopeId)
+    {
+        $jurKlsProdi = $this->parseJurKlsProdi($data['jur_kls_prodi'] ?? '');
+
+        return $this->determineClassInfo([
+            'kode_jurusan' => $jurKlsProdi['kode_jurusan'] ?? null,
+            'kode_prodi' => $jurKlsProdi['kode_prodi'] ?? null,
+            'kelas' => $jurKlsProdi['kelas'] ?? null
+        ], $scope, $scopeId);
+    }
+
+    
     protected function determineClassInfo($parsedData, $scope, $scopeId)
     {
         switch ($scope) {

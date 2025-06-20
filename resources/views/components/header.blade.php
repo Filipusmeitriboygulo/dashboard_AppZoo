@@ -12,4 +12,5 @@
             data-client-key="{{ config('midtrans.client_key') }}">
     </script>
 
+
 </head>

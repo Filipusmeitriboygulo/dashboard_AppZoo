@@ -20,19 +20,19 @@ class KlasterisasiController extends Controller
 
     public function index()
     {
-        
+
         $file_uploads = FileUpload::all();
         // dd($file_uploads);
         return view('klasterisasi.index')->with('file_uploads', $file_uploads);
     }
-    
+
     public function analyze(Request $request)
     {
         // session()->forget(['analysis_data', 'file_info', 'success']);
         $request->validate([
             'file_upload_id' => 'required|exists:file_uploads,id'
         ]);
-        
+
         $file = FileUpload::findOrFail($request->file_upload_id);
         $filePath = storage_path('app/csv_uploads/' . $file->name);
 
@@ -40,7 +40,7 @@ class KlasterisasiController extends Controller
             if (!file_exists($filePath)) {
                 throw new \Exception("File tidak ditemukan di server.");
             }
-            
+
             $fileContent = file_get_contents($filePath);
             $lines = explode("\n", $fileContent);
             if (count($lines) < 5) {
@@ -52,22 +52,22 @@ class KlasterisasiController extends Controller
 
             if ($response->successful()) {
                 $result = $response->json();
-                
+
                 if (!isset($result['status'])) {
                     throw new \Exception('Respon tidak valid dari server klasterisasi');
                 }
-                
+
                 if ($result['status'] === 'error') {
                     throw new \Exception($result['message'] ?? 'Error pada proses klasterisasi');
                 }
-                
+
                 $requiredKeys = ['student_results', 'cluster_counts', 'centroids', 'recommendations'];
                 foreach ($requiredKeys as $key) {
                     if (!isset($result['data'][$key])) {
                         throw new \Exception("Data hasil tidak lengkap. Key '$key' tidak ditemukan");
                     }
                 }
-                
+
                 session([
                     'analysis_data' => $result['data'],
                     'file_info' => [
@@ -87,7 +87,7 @@ class KlasterisasiController extends Controller
         }
     }
 
-    
+
     public function result()
     {
 

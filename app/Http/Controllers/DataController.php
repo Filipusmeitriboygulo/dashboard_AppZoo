@@ -98,7 +98,7 @@ class DataController extends Controller
             'file.required' => 'File harus diisi',
             'file.file' => 'Input harus berupa file',
             'file.mimes' => 'Hanya format CSV/TXT yang diperbolehkan',
-            'file.max' => 'Ukuran file maksimal 5MB'
+            'file.max' => 'Ukuran file maksimal 10MB'
         ]);
 
         // Jika validasi gagal
