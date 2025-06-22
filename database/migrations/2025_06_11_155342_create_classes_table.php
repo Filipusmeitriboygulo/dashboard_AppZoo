@@ -12,11 +12,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('study_program_id')->constrained()->onDelete('cascade');
             $table->string('name');
-            $table->string('academic_year', 10);
+            // $table->string('academic_year', 10);
             $table->integer('semester');
             $table->timestamps();
 
-            $table->index(['study_program_id', 'academic_year', 'semester']);
+            // $table->index(['study_program_id', 'academic_year', 'semester']);
         });
     }
 

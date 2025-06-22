@@ -36,9 +36,11 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     // Additional admin routes will be added here
     // Route::get('data-upload/scores/{file}', [DataUploadController::class, 'viewScores'])->name('admin.data-upload.scores');
     Route::get('/data-upload', [UploadLogController::class, 'index'])->name('admin.data-upload.index');
-    Route::post('/data-upload/upload', [UploadLogController::class, 'upload'])->name('toefl.upload');
-    Route::post('/data-upload/process', [UploadLogController::class, 'process'])->name('admin.data-upload.process');
-    Route::get('/data-upload/scores/{uploadId}', [UploadLogController::class, 'showScores'])->name('admin.data-upload.scores');
+    Route::post('/data/upload', [DataUploadController::class, 'upload'])->name('data.upload');
+    Route::get('/data-upload/scores/{uploadId}', [DataUploadController::class, 'viewScores'])->name('data.scores');
+    Route::post('/data-upload/scores-delete/{uploadId}', [DataUploadController::class, 'deleteScores'])->name('data.score-delete');
+    // Route::post('/data-upload/upload', [UploadLogController::class, 'upload'])->name('toefl.upload');
+    // Route::post('/data-upload/process', [UploadLogController::class, 'process'])->name('admin.data-upload.process');
 });
 
 

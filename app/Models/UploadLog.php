@@ -20,7 +20,7 @@ class UploadLog extends Model
         'unit_nama',
         'waktu_upload',
         'status_klasterisasi',
-        'jumlah_data'
+        // 'jumlah_data'
     ];
 
     public function user(): BelongsTo

@@ -1,17 +1,18 @@
 <?php
+
 namespace App\Imports;
 
-use App\Models\Score;
+use App\Models\ToeflScoreEntry;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class ScoreImport implements ToModel, WithHeadingRow
 {
-    protected $toefl_file_id;
+    protected $upload_id;
 
-    public function __construct($toefl_file_id)
+    public function __construct($upload_id)
     {
-        $this->toefl_file_id = $toefl_file_id;
+        $this->$upload_id = $upload_id;
     }
 
     public function headingRow(): int
@@ -38,21 +39,20 @@ class ScoreImport implements ToModel, WithHeadingRow
             $kelas = trim($parts[2] ?? null);
         }
 
-        return new Score([
-            'toefl_file_id' => $this->toefl_file_id,
+        return new ToeflScoreEntry([
+            'toefl_file_id' => $this->upload_id,
             'nama' => $row['nama'],
-            'nim_mahasiswa' => (string) ($row['nim_mahasiswa'] ?? null),
+            'nim' => (string) ($row['nim'] ?? null),
             'jurusan' => $jurusan,
             'prodi' => $prodi,
             'kelas' => $kelas,
-            'listening_score' => $this->nullIfNotNumber($row['l'] ?? null),
-            'structure_score' => $this->nullIfNotNumber($row['s'] ?? null),
-            'reading_score' => $this->nullIfNotNumber($row['r'] ?? null),
+            // 'listening_score' => $this->nullIfNotNumber($row['l'] ?? null),
+            // 'structure_score' => $this->nullIfNotNumber($row['s'] ?? null),
+            // 'reading_score' => $this->nullIfNotNumber($row['r'] ?? null),
             'listening' => $this->nullIfNotNumber($row['listening'] ?? null),
             'structure' => $this->nullIfNotNumber($row['structure'] ?? null),
             'reading' => $this->nullIfNotNumber($row['reading'] ?? null),
-            'total' => $this->nullIfNotNumber($row['total'] ?? null),
+            'total_score' => $this->nullIfNotNumber($row['total'] ?? null),
         ]);
-
     }
 }

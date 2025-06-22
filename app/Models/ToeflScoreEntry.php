@@ -12,6 +12,7 @@ class ToeflScoreEntry extends Model
 {
     //protected $table = 'toefl_score_entries';
     protected $fillable = [
+        'upload_id',
         'nim',
         'nama',
         'kelas',

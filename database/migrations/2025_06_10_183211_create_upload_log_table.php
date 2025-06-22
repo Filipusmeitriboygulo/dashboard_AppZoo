@@ -13,14 +13,14 @@ return new class extends Migration
     {
 
         Schema::create('upload_log', function (Blueprint $table) {
-            $table->id('upload_id');
+            $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('file_name');
             $table->enum('cakupan', ['kampus', 'jurusan', 'prodi', 'kelas']);
             $table->string('unit_nama');
             $table->dateTime('waktu_upload')->useCurrent();
             $table->enum('status_klasterisasi', ['sudah', 'belum'])->default('belum');
-            $table->integer('jumlah_data');
+            // $table->integer('jumlah_data');
             $table->timestamps();
         });
     }

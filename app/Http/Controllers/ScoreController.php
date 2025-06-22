@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\ToeflFile;
 use App\Imports\ScoreImport;
+use App\Models\UploadLog;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ScoreController extends Controller
@@ -18,17 +18,20 @@ class ScoreController extends Controller
         ]);
         // dd($request->file(''));
 
-        // Simpan file ke public/data
+        // Simpan file ke public/uploads/toefl
         $file = $request->file('fileExcel');
         $fileName = time() . '_' . $file->getClientOriginalName();
-        $destinationPath = public_path('data');
+        $destinationPath = public_path('uploads/toefl');
         $file->move($destinationPath, $fileName);
 
-        // Simpan data file ke tabel toefl_files
-        $toeflFile = ToeflFile::create([
+        // Simpan data file ke tabel uploadLOg
+        $toeflFile = UploadLog::create([
             'file_name' => $fileName,
-            'file_path' => 'data/' . $fileName,
-            'uploaded_at' => now(),
+            // 'file_path' => 'data/' . $fileName,
+            // 'uploaded_at' => now(),
+            'cakupan' =>$cakupan,
+            'unit_nama'=>$unit_nama,
+            'waktu_upload'=>$waktu_upload
         ]);
 
         // Import data ke tabel score dengan relasi toefl_file_id

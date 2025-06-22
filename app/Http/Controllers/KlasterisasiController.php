@@ -20,7 +20,6 @@ class KlasterisasiController extends Controller
 
     public function index()
     {
-
         $file_uploads = FileUpload::all();
         // dd($file_uploads);
         return view('klasterisasi.index')->with('file_uploads', $file_uploads);

@@ -4,7 +4,7 @@
 @section('content')
 <div class="container">
     <h4>Data Score: <span class="text-primary">{{ $file->file_name }}</span></h4>
-    <p class="text-muted">File path: <code>{{ $file->file_path }}</code></p>
+    <p class="text-muted">Status Klasterisasi: <code>{{ $file->status_klasterisasi }}</code></p>
     <hr>
 
     <a href="{{ route('home') }}" class="btn btn-secondary mb-3">← Kembali ke Data Upload</a>
@@ -19,9 +19,9 @@
                     <th>Jurusan</th>
                     <th>Prodi</th>
                     <th>Kelas</th>
-                    <th>Listening Score</th>
-                    <th>Structure Score</th>
-                    <th>Reading Score</th>
+                    <th>Listening</th>
+                    <th>Structure</th>
+                    <th>Reading</th>
                     <th>Total</th>
                 </tr>
             </thead>
@@ -30,14 +30,14 @@
                     <tr>
                         <td>{{ $i+1 }}</td>
                         <td>{{ $score->nama }}</td>
-                        <td>{{ $score->nim_mahasiswa }}</td>
+                        <td>{{ $score->nim }}</td>
                         <td>{{ $score->jurusan }}</td>
                         <td>{{ $score->prodi }}</td>
                         <td>{{ $score->kelas }}</td>
-                        <td>{{ $score->listening_score }}</td>
-                        <td>{{ $score->structure_score }}</td>
-                        <td>{{ $score->reading_score }}</td>
-                        <td>{{ $score->total }}</td>
+                        <td>{{ $score->listening }}</td>
+                        <td>{{ $score->structure }}</td>
+                        <td>{{ $score->reading }}</td>
+                        <td>{{ $score->total_score }}</td>
                     </tr>
                 @empty
                     <tr>

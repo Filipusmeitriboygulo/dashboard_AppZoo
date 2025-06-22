@@ -11,18 +11,19 @@ class ClassSeeder extends Seeder
     public function run(): void
     {
         $studyPrograms = StudyProgram::all();
-        $academicYears = ['2022/2023', '2023/2024'];
-        $semesters= [1, 2, 3, 4];
+        $semesters = [1, 4];
+        $hurufs = ['A', 'B', 'C', 'D', 'E'];
 
         foreach ($studyPrograms as $program) {
-            foreach ($academicYears as $year) {
-                foreach ($semesters as $semester) {
-                    $className = $program->code . '-' . $semester . 'A' ;
+
+            foreach ($semesters as $semester) {
+                foreach ($hurufs as $huruf) {
+                    $className = $program->code . '-' . $semester . $huruf;
 
                     ClassModel::create([
                         'study_program_id' => $program->id,
                         'name' => $className,
-                        'academic_year' => $year,
+
                         'semester' => $semester,
                     ]);
                 }

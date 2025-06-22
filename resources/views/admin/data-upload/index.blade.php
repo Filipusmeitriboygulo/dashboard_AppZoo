@@ -3,7 +3,16 @@
 @section('title', 'Data Upload')
 
 @section('content')
+
+
+
     <div class="container-fluid">
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -87,10 +96,12 @@
                                                                 @endforeach
                                                             @elseif ($scope === 'class')
                                                                 @foreach ($dept->studyPrograms as $program)
+                                                                    <h6 class="ms-3">{{ $program->name }}</h6>
                                                                     @foreach ($program->classes as $class)
                                                                         <li>
                                                                             <button class="dropdown-item"
-                                                                                onclick="showUploadModal('class', '{{ $class->id }}', '{{ $class->name }}')">
+                                                                                onclick="showUploadModal('class',  '{{ $class->id }}', '{{ $class->fullname }}')">
+
                                                                                 {{ $class->name }}
                                                                             </button>
                                                                         </li>
@@ -116,7 +127,7 @@
                                             <tr>
                                                 <th>No</th>
                                                 <th>File Name</th>
-                                                <th>Path</th>
+                                                <th>Cakupan</th>
                                                 <th>Tanggal Upload</th>
                                                 <th>Action</th>
                                             </tr>
@@ -124,16 +135,27 @@
                                         <tbody>
                                             @forelse($files as $file)
                                                 <tr>
-                                                    <td><code>{{ $file['id'] }}</code></td>
+                                                    <td><code>{{ $loop->iteration }}</code></td>
                                                     <td>{{ $file['file_name'] }}</td>
-                                                    <td>{{ $file['file_path'] }}</td>
-                                                    <td>{{ $file['uploaded_at'] }}</td>
+                                                    <td>{{ $file['cakupan'] }}</td>
+                                                    <td>{{ $file['waktu_upload'] }}</td>
                                                     <td>
-                                                        <a href="{{ route('admin.data-upload.scores', $file['id']) }}"
+                                                        <a href="{{ route('data.scores', $file['id']) }}"
                                                             class="btn btn-sm btn-outline-primary">
                                                             <i class="fas fa-eye"></i> View
                                                         </a>
                                                     </td>
+                                                    <td>
+                                                        <form action="{{ route('data.score-delete', $file['id']) }}"
+                                                            method="POST"
+                                                            onsubmit="return confirm('Yakin ingin menghapus data ini?');">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                                <i class="fas fa-trash-alt"></i> Delete
+                                                            </button>
+                                                        </form>
+                                                    </td>
+
                                                 </tr>
                                             @empty
                                                 <tr>
@@ -160,10 +182,11 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="uploadForm" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('data.upload') }}" id="uploadForm" enctype="multipart/form-data">
                         @csrf
-                        <input type="hidden" id="scope" name="scope">
-                        <input type="hidden" id="scope_id" name="scope_id">
+                        <input type="hidden" id="scope" name="cakupan">
+                        <input type="hidden" id="scope_id" name="unit_nama">
+                        <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
 
                         <div class="mb-3">
                             <label class="form-label">Upload untuk: <span id="scopeLabel"
@@ -184,15 +207,23 @@
                             </div>
                         </div>
 
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Keterangan (Opsional)</label>
+                            <textarea class="form-control" name="description" id="description" rows="2"></textarea>
+                        </div>
+
                         <div id="uploadProgress" class="mb-3" style="display: none;">
                             <div class="progress">
                                 <div class="progress-bar" role="progressbar" style="width: 0%"></div>
                             </div>
+                            <div class="text-center mt-2" id="progressText">Mengupload file...</div>
                         </div>
+
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary" onclick="submitUpload()">Upload &
-                                Preview</button>
+                            <button type="submit" class="btn btn-success" id="upload-button">
+                                <i class="fa fa-upload mr-2"></i> Upload
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -201,195 +232,83 @@
     </div>
 @endsection
 
+
+
 @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            window.showUploadModal = function(scope, scopeId = null, scopeName = null) {
-                const scopeInput = document.getElementById('scope');
-                const scopeIdInput = document.getElementById('scope_id');
-                const scopeLabel = document.getElementById('scopeLabel');
-                const uploadForm = document.getElementById('uploadForm');
-                const uploadProgress = document.getElementById('uploadProgress');
-                const uploadModalEl = document.getElementById('uploadModal');
+        function showUploadModal(scope, scopeId = null, scopeName = null) {
+            const modal = new bootstrap.Modal(document.getElementById('uploadModal'));
 
-                scopeInput.value = scope;
-                scopeIdInput.value = scopeId || '';
-
-                let label = '';
-                switch (scope) {
-                    case 'campus':
-                        label = 'Seluruh Kampus';
-                        break;
-                    case 'department':
-                        label = 'Jurusan: ' + scopeName;
-                        break;
-                    case 'study_program':
-                        label = 'Program Studi: ' + scopeName;
-                        break;
-                    case 'class':
-                        label = 'Kelas: ' + scopeName;
-                        break;
-                    default:
-                        label = scopeName || scope;
-                        break;
-                }
-
-                scopeLabel.textContent = label;
-                uploadForm.reset();
-                uploadProgress.style.display = 'none';
-                const progressBar = uploadProgress.querySelector('.progress-bar');
-                if (progressBar) progressBar.style.width = '0%';
-
-                const modal = bootstrap.Modal.getOrCreateInstance(uploadModalEl);
-                modal.show();
+            // Mapping scope values to match database enum
+            const scopeMap = {
+                'campus': 'kampus',
+                'department': 'jurusan',
+                'study_program': 'prodi',
+                'class': 'kelas'
             };
-        });
 
-        // async function submitUpload() {
-        //     const form = document.getElementById('uploadForm');
-        //     const formData = new FormData(form);
-        //     const progressBar = document.queryS public
-        //     function upload(Request $request) {
-        //         $request - > validate([
-        //             'fileExcel' => 'required|file|mimes:xlsx,xls,csv|max:10240',
-        //         ]);
+            // Set nilai input hidden dan label
+            document.getElementById('scope').value = scopeMap[scope]; // Use mapped value
+            document.getElementById('scope_id').value = scopeName || scopeId || ''; // Use scopeName as fallback
 
-        //         $user = Auth::user();
-        //         $file = $request - > file('fileExcel');
-        //         $filename = 'toefl_'.time().
-        //         '.'.$file - > getClientOriginalExtension();
-        //         $path = $file - > storeAs('uploads/toefl', $filename, 'public');
+            // Set display label (unchanged)
+            let label = '';
+            switch (scope) {
+                case 'campus':
+                    label = 'Seluruh Kampus';
+                    break;
+                case 'department':
+                    label = 'Jurusan: ' + scopeName;
+                    break;
+                case 'study_program':
+                    label = 'Program Studi: ' + scopeName;
+                    break;
+                case 'class':
+                    label = 'Kelas: ' + scopeName;
+                    break;
+                default:
+                    label = scopeName || scope;
+            }
 
-        //         $log = UploadLog::create([
-        //             'user_id' => $user - > id,
-        //             'file_name' => $filename,
-        //             'cakupan' => $request - > scope ?? 'campus',
-        //             'unit_nama' => $request - > scope_id ?? 'ALL',
-        //             'waktu_upload' => now(),
-        //             'status_klasterisasi' => 'pending',
-        //         ]);
+            document.getElementById('scopeLabel').textContent = label;
 
-        //         return response() - > json([
-        //             'success' => true,
-        //             'message' => 'File uploaded successfully',
-        //             'batch_id' => $log - > id,
-        //             'file_path' => $path,
-        //             'file_type' => $file - > getClientOriginalExtension(),
-        //         ]);
-        //     }
-        //     selector('#uploadProgress .progress-bar');
-        //     const uploadProgress = document.getElementById('uploadProgress');
-        //     const uploadModal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
-
-        //     uploadProgress.style.display = 'block';
-
-        //     try {
-        //         const response = await fetch("{{ route('toefl.upload') }}", {
-        //             method: 'POST',
-        //             headers: {
-        //                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-        //                 'Accept': 'application/json',
-        //             },
-        //             body: formData,
-        //         });
-
-        //         // Handle non-JSON responses
-        //         const contentType = response.headers.get("content-type");
-        //         if (!contentType || !contentType.includes("application/json")) {
-        //             const text = await response.text();
-        //             throw new Error(text.includes('<html') ?
-        //                 'Session mungkin habis, silakan refresh halaman' :
-        //                 'Respons server tidak valid');
-        //         }
-
-        //         const result = await response.json();
-
-        //         if (!response.ok) {
-        //             throw new Error(result.message || 'Upload gagal');
-        //         }
-
-        //         progressBar.style.width = '100%';
-        //         alert(result.message || 'Upload berhasil!');
-        //         uploadModal.hide();
-        //         location.reload();
-
-        //     } catch (error) {
-        //         console.error('Upload error:', error);
-        //         alert(`Error: ${error.message}`);
-        //         progressBar.style.width = '0%';
-        //     }
-        // }
-        async function submitUpload() {
-            const form = document.getElementById('uploadForm');
-            const formData = new FormData(form);
+            // Reset form and progress bar
+            document.getElementById('uploadForm').reset();
             const progressBar = document.querySelector('#uploadProgress .progress-bar');
+            if (progressBar) progressBar.style.width = '0%';
+            const progressText = document.getElementById('progressText');
+            if (progressText) progressText.textContent = 'Mengupload file...';
+            document.getElementById('uploadProgress').style.display = 'none';
+            document.getElementById('upload-button').disabled = false;
+
+            // Tampilkan modal
+            modal.show();
+        }
+
+        // Form submission handler
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const progressBar = document.querySelector('#uploadProgress .progress-bar');
+            const progressText = document.getElementById('progressText');
             const uploadProgress = document.getElementById('uploadProgress');
-            const uploadModal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
-            const submitBtn = form.querySelector('button[type="button"]');
+            const uploadButton = document.getElementById('upload-button');
 
-            // Deklarasikan progressInterval di scope fungsi
-            let progressInterval = null;
-
-            // Validasi client-side sebelum upload
-            const fileInput = document.getElementById('fileExcel');
-            if (!fileInput.files || fileInput.files.length === 0) {
-                alert('Silakan pilih file terlebih dahulu');
-                return;
-            }
-
-            const file = fileInput.files[0];
-            const validExtensions = ['xlsx', 'xls', 'csv'];
-            const fileExt = file.name.split('.').pop().toLowerCase();
-
-            if (!validExtensions.includes(fileExt)) {
-                alert('Format file harus xlsx, xls, atau csv');
-                return;
-            }
-
-            if (file.size > 10 * 1024 * 1024) {
-                alert('Ukuran file maksimal 10MB');
-                return;
-            }
-
-            // Mulai upload
+            // Show progress
             uploadProgress.style.display = 'block';
-            submitBtn.disabled = true;
-            progressBar.style.width = '0%';
+            uploadButton.disabled = true;
+            progressBar.style.width = '10%';
+            progressText.textContent = 'Mengupload file...';
 
             try {
-                // Setup progress interval
-                progressInterval = setInterval(() => {
-                    const currentWidth = parseInt(progressBar.style.width) || 0;
-                    if (currentWidth < 90) {
-                        progressBar.style.width = `${currentWidth + 5}%`;
-                    }
-                }, 200);
-
-                const response = await fetch("{{ route('toefl.upload') }}", {
+                const response = await fetch(this.action, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
                     },
                     body: formData,
                 });
-
-                // Hentikan interval dan set ke 100% saat upload selesai
-                if (progressInterval) clearInterval(progressInterval);
-                progressBar.style.width = '100%';
-
-                // Handle response
-                if (response.status === 419) {
-                    throw new Error('Session expired, silakan refresh halaman');
-                }
-
-                const contentType = response.headers.get("content-type");
-                if (!contentType || !contentType.includes("application/json")) {
-                    const text = await response.text();
-                    throw new Error(text.includes('<html') ?
-                        'Session mungkin habis, silakan refresh halaman' :
-                        'Respons server tidak valid');
-                }
 
                 const result = await response.json();
 
@@ -397,18 +316,21 @@
                     throw new Error(result.message || 'Upload gagal');
                 }
 
-                alert(result.message || 'Upload berhasil!');
-                uploadModal.hide();
-                setTimeout(() => location.reload(), 1000); // Beri jeda sebelum reload
+                // Update progress
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Upload berhasil! Memproses data...';
+
+                // Reload after delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
 
             } catch (error) {
                 console.error('Upload error:', error);
-                alert(`Error: ${error.message}`);
                 progressBar.style.width = '0%';
-            } finally {
-                submitBtn.disabled = false;
-                if (progressInterval) clearInterval(progressInterval);
+                progressText.textContent = 'Error: ' + error.message;
+                uploadButton.disabled = false;
             }
-        }
+        });
     </script>
 @endpush
