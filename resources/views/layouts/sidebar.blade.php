@@ -30,15 +30,26 @@
                         <span class="hide-menu">KLASTERISASI</span>
                     </a>
                 </li>
-                <li class="sidebar-item">
+                {{-- <li class="sidebar-item">
                     <a class="sidebar-link" aria-expanded="false"
-                        href="{{ route('klasterisasi.result', ['upload_id' => 1]) }}">
+                        href="{{ route('klasterisasi.result', ['upload_id' => $upload->id]) }}
+">
                         <span>
                             <i class="ti ti-cards"></i>
                         </span>
                         <span class="hide-menu">DASHBOARD</span>
                     </a>
-                </li>
+                </li> --}}
+
+                @if (isset($upload))
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{{ route('klasterisasi.result', ['upload_id' => $upload->id]) }}">
+                            <span><i class="ti ti-cards"></i></span>
+                            <span class="hide-menu">DASHBOARD</span>
+                        </a>
+                    </li>
+                @endif
+
                 <li class="sidebar-item">
                     <a class="sidebar-link" aria-expanded="false">
                         <span>

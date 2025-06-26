@@ -1,5 +1,4 @@
-@extends('layouts.app')
-
+@extends('layouts.auth')
 @section('content')
     <div class="container-fluid">
         <div class="row">
@@ -8,10 +7,10 @@
                     <div class="card-header bg-primary text-white">
                         <h3 class="mb-0">
                             <i class="fas fa-chart-pie"></i> Hasil Klasterisasi TOEFL
-                            <small class="float-end">
+                            {{-- <small class="float-end">
                                 Upload ID: {{ $upload->id }} |
                                 Tanggal: {{ $upload->created_at->format('d/m/Y H:i') }}
-                            </small>
+                            </small> --}}
                         </h3>
                     </div>
 
@@ -50,7 +49,7 @@
                                             <h4><i class="fas fa-chart-pie"></i> Distribusi Cluster</h4>
                                         </div>
                                         <div class="card-body">
-                                            <canvas id="clusterChart" height="250"></canvas>
+                                            <canvas id="clusterChart" width="400" height="400"></canvas>
                                         </div>
                                     </div>
                                 </div>
@@ -151,7 +150,7 @@
                                                         <td>{{ $result->toeflScoreEntry->listening ?? '-' }}</td>
                                                         <td>{{ $result->toeflScoreEntry->structure ?? '-' }}</td>
                                                         <td>{{ $result->toeflScoreEntry->reading ?? '-' }}</td>
-                                                        <td>{{ $result->toeflScoreEntry->total ?? '-' }}</td>
+                                                        <td>{{ $result->toeflScoreEntry->prodi ?? '-' }}</td>
                                                         <td>
                                                             <span
                                                                 class="badge bg-{{ $result->cluster == 1 ? 'danger' : ($result->cluster == 2 ? 'warning' : 'success') }}">
@@ -159,25 +158,17 @@
                                                             </span>
                                                         </td>
                                                         <td>
-                                                            <div class="progress" style="height: 20px;">
-                                                                <div class="progress-bar bg-danger"
-                                                                    style="width: {{ $result->membership_cluster1 * 100 }}%"
-                                                                    title="Cluster 1: {{ round($result->membership_cluster1 * 100, 1) }}%">
-                                                                </div>
-                                                                <div class="progress-bar bg-warning"
-                                                                    style="width: {{ $result->membership_cluster2 * 100 }}%"
-                                                                    title="Cluster 2: {{ round($result->membership_cluster2 * 100, 1) }}%">
-                                                                </div>
-                                                                <div class="progress-bar bg-success"
-                                                                    style="width: {{ $result->membership_cluster3 * 100 }}%"
-                                                                    title="Cluster 3: {{ round($result->membership_cluster3 * 100, 1) }}%">
-                                                                </div>
-                                                            </div>
+                                                            Cluster 1: {{ round($result->membership_cluster1 * 100, 1) }}%
+                                                            |
+                                                            Cluster 2: {{ round($result->membership_cluster2 * 100, 1) }}%
+                                                            |
+                                                            Cluster 3: {{ round($result->membership_cluster3 * 100, 1) }}%
                                                         </td>
                                                         <td>{{ $result->insight }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
+
                                         </table>
                                     </div>
                                 </div>
@@ -207,6 +198,10 @@
             @endforeach
 
             // Buat chart
+
+            const clusterCounts = @json($chartClusterCounts);
+            console.log("Cluster Data:", clusterCounts);
+
             const ctx = document.getElementById('clusterChart').getContext('2d');
             new Chart(ctx, {
                 type: 'doughnut',
@@ -214,11 +209,7 @@
                     labels: ['Cluster 1', 'Cluster 2', 'Cluster 3'],
                     datasets: [{
                         data: [clusterCounts[1], clusterCounts[2], clusterCounts[3]],
-                        backgroundColor: [
-                            '#dc3545', // Cluster 1 (Danger)
-                            '#ffc107', // Cluster 2 (Warning)
-                            '#28a745' // Cluster 3 (Success)
-                        ],
+                        backgroundColor: ['#dc3545', '#ffc107', '#28a745'],
                         borderWidth: 1
                     }]
                 },
@@ -243,10 +234,12 @@
                 }
             });
 
+
             // DataTable
             $('#resultsTable').DataTable({
                 responsive: true,
-                dom: '<"top"Bf>rt<"bottom"lip><"clear">',
+                dom: '<"top"Bf>rt<"bottom"lip> <
+                    "clear" > ',
                 buttons: [
                     'copy', 'excel', 'pdf'
                 ],
