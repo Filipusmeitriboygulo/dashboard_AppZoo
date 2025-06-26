@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DataUploadController;
+use App\Http\Controllers\Admin\KlasterisasiController;
 use App\Http\Controllers\KepalaUPA\KepalaUPAController;
 use App\Http\Controllers\KetuaJurusan\KetuaJurusanController;
 use App\Http\Controllers\KetuaProdi\KetuaProdiController;
@@ -35,12 +36,24 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     // Route::get('/data-upload/batch/{batchId}', [DataUploadController::class, 'viewBatch'])->name('admin.data-upload.batch');
     // Additional admin routes will be added here
     // Route::get('data-upload/scores/{file}', [DataUploadController::class, 'viewScores'])->name('admin.data-upload.scores');
+    // Route::post('/data-upload/upload', [UploadLogController::class, 'upload'])->name('toefl.upload');
+    // Route::post('/data-upload/process', [UploadLogController::class, 'process'])->name('admin.data-upload.process');
+    
+    // File Upload
     Route::get('/data-upload', [UploadLogController::class, 'index'])->name('admin.data-upload.index');
     Route::post('/data/upload', [DataUploadController::class, 'upload'])->name('data.upload');
     Route::get('/data-upload/scores/{uploadId}', [DataUploadController::class, 'viewScores'])->name('data.scores');
     Route::post('/data-upload/scores-delete/{uploadId}', [DataUploadController::class, 'deleteScores'])->name('data.score-delete');
-    // Route::post('/data-upload/upload', [UploadLogController::class, 'upload'])->name('toefl.upload');
-    // Route::post('/data-upload/process', [UploadLogController::class, 'process'])->name('admin.data-upload.process');
+
+
+    // Klasterisasi 
+    // Route::get('/klasterisasi', [KlasterisasiController::class, 'index'])->name('klasterisasi.index');
+    // Route::post('/klasterisasi/analyze', [KlasterisasiController::class, 'analyze'])->name('klasterisasi.analyze');
+    // Route::get('/klasterisasi/result/{upload_id}', [KlasterisasiController::class, 'result'])->name('klasterisasi.result');
+
+    Route::get('/klasterisasi', [KlasterisasiController::class, 'index'])->name('klasterisasi.index');
+    Route::post('/klasterisasi/analyze', [KlasterisasiController::class, 'analyze'])->name('klasterisasi.analyze');
+    Route::get('/klasterisasi/result/{upload_id}', [KlasterisasiController::class, 'result'])->name('klasterisasi.result');
 });
 
 

@@ -5,6 +5,7 @@
 <div class="container">
     <h4>Data Score: <span class="text-primary">{{ $file->file_name }}</span></h4>
     <p class="text-muted">Status Klasterisasi: <code>{{ $file->status_klasterisasi }}</code></p>
+    <p class="text-muted">Nama Unit: <code>{{ $file->unit_nama }}</code></p>
     <hr>
 
     <a href="{{ route('home') }}" class="btn btn-secondary mb-3">← Kembali ke Data Upload</a>

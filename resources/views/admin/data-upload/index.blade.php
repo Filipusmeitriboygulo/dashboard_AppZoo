@@ -37,22 +37,22 @@
                                 'campus' => [
                                     'icon' => 'fa-university',
                                     'color' => 'primary',
-                                    'label' => 'Seluruh Kampus',
+                                    'label' => 'Seluruh Jurusan',
                                 ],
                                 'department' => [
                                     'icon' => 'fa-building',
                                     'color' => 'success',
-                                    'label' => 'Per Jurusan',
+                                    'label' => 'Departement',
                                 ],
                                 'study_program' => [
                                     'icon' => 'fa-graduation-cap',
                                     'color' => 'warning',
-                                    'label' => 'Per Program Studi',
+                                    'label' => 'Study Program',
                                 ],
                                 'class' => [
                                     'icon' => 'fa-users',
                                     'color' => 'info',
-                                    'label' => 'Per Kelas',
+                                    'label' => 'Class',
                                 ],
                             ];
                         @endphp
@@ -65,7 +65,7 @@
                                             <i
                                                 class="fas {{ $icons[$scope]['icon'] }} fa-3x text-{{ $icons[$scope]['color'] }} mb-3"></i>
                                             <h5>{{ $icons[$scope]['label'] }}</h5>
-                                            <p class="text-muted">Upload data berdasarkan
+                                            <p class="text-muted">Upload data berdasarkan 
                                                 {{ str_replace('_', ' ', $scope) }}</p>
                                             @if ($scope === 'campus')
                                                 <button class="btn btn-{{ $icons[$scope]['color'] }}"
