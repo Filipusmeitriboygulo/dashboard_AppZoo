@@ -21,10 +21,10 @@ class KlasterisasiController extends Controller
 
     public function index()
     {
-        $file_uploads = UploadLog::all();
-        // dd($file_uploads);
-        return view('admin.klasterisasi.index')->with('file_uploads', $file_uploads);
+        $file_uploads = UploadLog::orderBy('created_at', 'desc')->get();
+        return view('admin.klasterisasi.index', compact('file_uploads'));
     }
+
 
 
     // public function analyze(Request $request)
@@ -307,6 +307,7 @@ class KlasterisasiController extends Controller
             }
 
             $apiResult = $response->json();
+            // dd($apiResult);
 
             if ($apiResult['status'] !== 'success') {
                 throw new \Exception($apiResult['message'] ?? 'Invalid API response');
@@ -326,9 +327,11 @@ class KlasterisasiController extends Controller
                     }
 
                     ClusterResult::updateOrCreate(
-                        ['toefl_score_entry_id' => $toeflEntry->id],
                         [
                             'upload_id' => $file->id,
+                            'toefl_score_entry_id' => $toeflEntry->id
+                        ],
+                        [
                             'cluster' => (int) $studentData['Cluster'],
                             'membership_cluster1' => (float) $studentData['Membership_Cluster_1'],
                             'membership_cluster2' => (float) $studentData['Membership_Cluster_2'],
@@ -361,7 +364,71 @@ class KlasterisasiController extends Controller
         }
     }
 
+    public function reanalyze($id)
+    {
+        $upload = UploadLog::findOrFail($id);
+        $filePath = storage_path('app/public/uploads/toefl/' . $upload->file_name);
 
+        if (!file_exists($filePath)) {
+            return redirect()->back()->withErrors('File tidak ditemukan untuk dianalisis ulang.');
+        }
+
+        try {
+            // Hapus hasil klasterisasi sebelumnya
+            ClusterResult::where('upload_id', $upload->id)->delete();
+
+            // Kirim ulang ke API Flask
+            $response = Http::timeout(120)
+                ->attach('file', file_get_contents($filePath), $upload->file_name)
+                ->post('http://127.0.0.1:5000/cluster');
+
+            if (!$response->successful()) {
+                throw new \Exception('API error: ' . $response->body());
+            }
+
+            $apiResult = $response->json();
+
+            if ($apiResult['status'] !== 'success') {
+                throw new \Exception($apiResult['message'] ?? 'Gagal dari API');
+            }
+
+            DB::beginTransaction();
+
+            foreach ($apiResult['data']['student_results'] as $studentData) {
+                $entry = ToeflScoreEntry::where([
+                    'upload_id' => $upload->id,
+                    'nim' => $studentData['Nim Mahasiswa']
+                ])->first();
+
+                if (!$entry) {
+                    throw new \Exception("Data TOEFL tidak ditemukan untuk NIM: {$studentData['Nim Mahasiswa']}");
+                }
+
+                ClusterResult::create([
+                    'upload_id' => $upload->id,
+                    'toefl_score_entry_id' => $entry->id,
+                    'cluster' => $studentData['Cluster'],
+                    'membership_cluster1' => $studentData['Membership_Cluster_1'],
+                    'membership_cluster2' => $studentData['Membership_Cluster_2'],
+                    'membership_cluster3' => $studentData['Membership_Cluster_3'],
+                    'insight' => $studentData['Insight'],
+                ]);
+            }
+
+            $upload->update([
+                'status_klasterisasi' => 'sudah',
+                'cluster_data' => json_encode($apiResult['data']['cluster_info']),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('klasterisasi.result', $upload->id)
+                ->with('success', 'Analisis ulang berhasil.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors('Gagal menganalisis ulang: ' . $e->getMessage());
+        }
+    }
     // Extract Prodi
     // private function extractProdi(?string $dataString): string
     // {
@@ -395,7 +462,7 @@ class KlasterisasiController extends Controller
 
     //     // Jika format lengkap (Jurusan/Prodi/Kelas) dan memiliki 3 bagian
     //     if (count($parts) >= 3) {
-    //         return $parts[2]; // Kelas ada di posisi ketiga
+    //         return $parts[2]cluster_info; // Kelas ada di posisi ketiga
     //     }
 
     //     // Fallback: cari bagian yang paling mungkin menjadi kelas (1 huruf/angka)
@@ -504,21 +571,17 @@ class KlasterisasiController extends Controller
 
     public function result($upload_id)
     {
-        // Ambil data upload, beserta hasil klasterisasi dan entri TOEFL terkait
-        $upload = UploadLog::with(['clusterResults', 'clusterResults.toeflScoreEntry'])
-            ->findOrFail($upload_id);
+        $upload = UploadLog::with(['clusterResults', 'clusterResults.toeflScoreEntry'])->findOrFail($upload_id);
 
-        // Validasi status klasterisasi
-        if ($upload->status_klasterisasi !== 'sudah') {
-            return back()->withErrors('Data belum diproses melalui analisis klasterisasi');
-        }
+        // if ($upload->status_klasterisasi !== 'sudah') {
+        //     return back()->withErrors('Data belum diproses melalui analisis klasterisasi');
+        // }
 
-        // Validasi ketersediaan hasil klasterisasi
-        if ($upload->clusterResults->isEmpty()) {
-            return back()->withErrors('Data hasil klasterisasi belum tersedia');
-        }
+        // if ($upload->clusterResults->isEmpty()) {
+        //     return back()->withErrors('Data hasil klasterisasi belum tersedia');
+        // }
 
-        // Decode JSON cluster_info
+        // Decode cluster_data dengan error handling
         $cluster_info = [];
         if ($upload->cluster_data) {
             $cluster_info = json_decode($upload->cluster_data, true);
@@ -527,32 +590,19 @@ class KlasterisasiController extends Controller
                     'upload_id' => $upload_id,
                     'error' => json_last_error_msg()
                 ]);
+                // Tetap lanjutkan dengan array kosong
                 $cluster_info = [];
             }
         }
 
-        // Hitung jumlah anggota per cluster
-        $clusterCounts = ClusterResult::where('upload_id', $upload_id)
-            ->selectRaw('cluster, COUNT(*) as count')
-            ->groupBy('cluster')
-            ->pluck('count', 'cluster') // hasil: [1 => 10, 2 => 5, 3 => 12]
-            ->toArray();
-
-        // Lengkapi cluster yang kosong agar tetap muncul
-        $chartClusterCounts = [
-            1 => $clusterCounts[1] ?? 0,
-            2 => $clusterCounts[2] ?? 0,
-            3 => $clusterCounts[3] ?? 0,
-        ];
-
-        // Kirim ke view
         return view('admin.klasterisasi.result', [
             'results' => $upload->clusterResults,
             'cluster_info' => $cluster_info,
             'upload' => $upload,
-            'chartClusterCounts' => $chartClusterCounts,
+            'visualization' => $apiResult['data']['visualization'] ?? null,
         ]);
     }
+
     private function generateVisualization($results)
     {
         // Implementasi generate gambar jika diperlukan

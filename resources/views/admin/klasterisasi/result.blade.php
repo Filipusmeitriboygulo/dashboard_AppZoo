@@ -1,4 +1,5 @@
 @extends('layouts.auth')
+
 @section('content')
     <div class="container-fluid">
         <div class="row">
@@ -7,10 +8,10 @@
                     <div class="card-header bg-primary text-white">
                         <h3 class="mb-0">
                             <i class="fas fa-chart-pie"></i> Hasil Klasterisasi TOEFL
-                            {{-- <small class="float-end">
+                            <small class="float-end">
                                 Upload ID: {{ $upload->id }} |
                                 Tanggal: {{ $upload->created_at->format('d/m/Y H:i') }}
-                            </small> --}}
+                            </small>
                         </h3>
                     </div>
 
@@ -21,6 +22,7 @@
                             </div>
                         @else
                             <!-- Visualisasi 3D -->
+                            {{-- <pre>{{ Str::limit($visualization, 100) }}</pre> lihat sebagian base64 --}}
                             <div class="row mb-4">
                                 <div class="col-md-12">
                                     <div class="card">
@@ -28,14 +30,16 @@
                                             <h4><i class="fas fa-project-diagram"></i> Visualisasi Cluster</h4>
                                         </div>
                                         <div class="card-body text-center">
-                                            @if (isset($cluster_info['visualization']))
-                                                <img src="{{ $cluster_info['visualization'] }}" class="img-fluid rounded"
-                                                    style="max-height: 500px;">
-                                            @else
-                                                <div class="alert alert-info">
-                                                    Visualisasi tidak tersedia
-                                                </div>
-                                            @endif
+                                            @if ($visualization)
+                                            <div class="my-4 text-center">
+                                                <h5>Visualisasi Klasterisasi</h5>
+                                                <img src="{{ $visualization }}" class="img-fluid" />
+
+                                            </div>
+                                        @else
+                                            <p class="text-danger">Gambar visualisasi tidak tersedia.</p>
+                                        @endif
+                                        
                                         </div>
                                     </div>
                                 </div>
@@ -43,23 +47,23 @@
 
                             <!-- Statistik Cluster -->
                             <div class="row mb-4">
-                                <div class="col-md-6">
+                                <div class="col-md">
                                     <div class="card h-100">
                                         <div class="card-header bg-success text-white">
                                             <h4><i class="fas fa-chart-pie"></i> Distribusi Cluster</h4>
                                         </div>
                                         <div class="card-body">
-                                            <canvas id="clusterChart" width="400" height="400"></canvas>
+                                            <canvas id="clusterChart" height="250"></canvas>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="col-md-6">
+                                {{-- <div class="col-md-6">
                                     <div class="card h-100">
                                         <div class="card-header bg-success text-white">
                                             <h4><i class="fas fa-shapes"></i> Informasi Cluster</h4>
                                         </div>
-                                        <div class="card-body">
+                                        {{-- <div class="card-body">
                                             @if (isset($cluster_info['centroids']))
                                                 <div class="table-responsive">
                                                     <table class="table table-bordered">
@@ -72,7 +76,7 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            @foreach ($cluster_info['centroids'] as $cluster => $centroid)
+                                                            @foreach ($ ['centroids'] as $cluster => $centroid)
                                                                 <tr>
                                                                     <td>Cluster {{ $cluster }}</td>
                                                                     <td>{{ number_format($centroid[0], 2) }}</td>
@@ -88,9 +92,9 @@
                                                     Data centroid tidak tersedia
                                                 </div>
                                             @endif
-                                        </div>
-                                    </div>
-                                </div>
+                                        </div> --}}
+                                    {{-- </div> --}}
+                                {{-- </div> --}} 
                             </div>
 
                             <!-- Rekomendasi -->
@@ -150,7 +154,7 @@
                                                         <td>{{ $result->toeflScoreEntry->listening ?? '-' }}</td>
                                                         <td>{{ $result->toeflScoreEntry->structure ?? '-' }}</td>
                                                         <td>{{ $result->toeflScoreEntry->reading ?? '-' }}</td>
-                                                        <td>{{ $result->toeflScoreEntry->prodi ?? '-' }}</td>
+                                                        <td>{{ $result->toeflScoreEntry->total_score ?? '-' }}</td>
                                                         <td>
                                                             <span
                                                                 class="badge bg-{{ $result->cluster == 1 ? 'danger' : ($result->cluster == 2 ? 'warning' : 'success') }}">
@@ -158,17 +162,22 @@
                                                             </span>
                                                         </td>
                                                         <td>
-                                                            Cluster 1: {{ round($result->membership_cluster1 * 100, 1) }}%
-                                                            |
-                                                            Cluster 2: {{ round($result->membership_cluster2 * 100, 1) }}%
-                                                            |
-                                                            Cluster 3: {{ round($result->membership_cluster3 * 100, 1) }}%
+                                                            <ul class="mb-0 ps-3">
+                                                                <li>Cluster 1:
+                                                                    {{ round($result->membership_cluster1 * 100, 1) }}%
+                                                                </li>
+                                                                <li>Cluster 2:
+                                                                    {{ round($result->membership_cluster2 * 100, 1) }}%
+                                                                </li>
+                                                                <li>Cluster 3:
+                                                                    {{ round($result->membership_cluster3 * 100, 1) }}%
+                                                                </li>
+                                                            </ul>
                                                         </td>
                                                         <td>{{ $result->insight }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
-
                                         </table>
                                     </div>
                                 </div>
@@ -198,10 +207,6 @@
             @endforeach
 
             // Buat chart
-
-            const clusterCounts = @json($chartClusterCounts);
-            console.log("Cluster Data:", clusterCounts);
-
             const ctx = document.getElementById('clusterChart').getContext('2d');
             new Chart(ctx, {
                 type: 'doughnut',
@@ -209,7 +214,11 @@
                     labels: ['Cluster 1', 'Cluster 2', 'Cluster 3'],
                     datasets: [{
                         data: [clusterCounts[1], clusterCounts[2], clusterCounts[3]],
-                        backgroundColor: ['#dc3545', '#ffc107', '#28a745'],
+                        backgroundColor: [
+                            '#dc3545', // Cluster 1 (Danger)
+                            '#ffc107', // Cluster 2 (Warning)
+                            '#28a745' // Cluster 3 (Success)
+                        ],
                         borderWidth: 1
                     }]
                 },
@@ -234,12 +243,10 @@
                 }
             });
 
-
             // DataTable
             $('#resultsTable').DataTable({
                 responsive: true,
-                dom: '<"top"Bf>rt<"bottom"lip> <
-                    "clear" > ',
+                dom: '<"top"Bf>rt<"bottom"lip><"clear">',
                 buttons: [
                     'copy', 'excel', 'pdf'
                 ],

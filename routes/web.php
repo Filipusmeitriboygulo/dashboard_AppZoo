@@ -53,6 +53,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
 
     Route::get('/klasterisasi', [KlasterisasiController::class, 'index'])->name('klasterisasi.index');
     Route::post('/klasterisasi/analyze', [KlasterisasiController::class, 'analyze'])->name('klasterisasi.analyze');
+    Route::post('/klasterisasi/reanalyze/{id}', [KlasterisasiController::class, 'reanalyze'])->name('klasterisasi.reanalyze');
     Route::get('/klasterisasi/result/{upload_id}', [KlasterisasiController::class, 'result'])->name('klasterisasi.result');
 });
 
