@@ -387,6 +387,7 @@ class KlasterisasiController extends Controller
             }
 
             $apiResult = $response->json();
+            // dd($apiResult);
 
             if ($apiResult['status'] !== 'success') {
                 throw new \Exception($apiResult['message'] ?? 'Gagal dari API');
@@ -569,28 +570,104 @@ class KlasterisasiController extends Controller
     // }
 
 
+    // public function result($upload_id)
+    // {
+    //     $upload = UploadLog::with(['clusterResults', 'clusterResults.toeflScoreEntry'])->findOrFail($upload_id);
+
+    //     // if ($upload->status_klasterisasi !== 'sudah') {
+    //     //     return back()->withErrors('Data belum diproses melalui analisis klasterisasi');
+    //     // }
+
+    //     // if ($upload->clusterResults->isEmpty()) {
+    //     //     return back()->withErrors('Data hasil klasterisasi belum tersedia');
+    //     // }
+
+    //     // Decode cluster_data dengan error handling
+    //     $cluster_info = [];
+    //     if ($upload->cluster_data) {
+    //         $cluster_info = json_decode($upload->cluster_data, true);
+    //         if (json_last_error() !== JSON_ERROR_NONE) {
+    //             Log::error('Invalid cluster_data JSON', [
+    //                 'upload_id' => $upload_id,
+    //                 'error' => json_last_error_msg()
+    //             ]);
+    //             // Tetap lanjutkan dengan array kosong
+    //             $cluster_info = [];
+    //         }
+    //     }
+
+    //     return view('admin.klasterisasi.result', [
+    //         'results' => $upload->clusterResults,
+    //         'cluster_info' => $cluster_info,
+    //         'upload' => $upload,
+    //         'visualization' => $apiResult['data']['visualization'] ?? null,
+    //     ]);
+    // }
+
     public function result($upload_id)
     {
         $upload = UploadLog::with(['clusterResults', 'clusterResults.toeflScoreEntry'])->findOrFail($upload_id);
 
-        // if ($upload->status_klasterisasi !== 'sudah') {
-        //     return back()->withErrors('Data belum diproses melalui analisis klasterisasi');
-        // }
+        // Hitung jumlah per cluster untuk chart
+        $clusterCounts = [
+            'cluster_1' => $upload->clusterResults->where('cluster', 1)->count(),
+            'cluster_2' => $upload->clusterResults->where('cluster', 2)->count(),
+            'cluster_3' => $upload->clusterResults->where('cluster', 3)->count()
+        ];
 
-        // if ($upload->clusterResults->isEmpty()) {
-        //     return back()->withErrors('Data hasil klasterisasi belum tersedia');
-        // }
 
-        // Decode cluster_data dengan error handling
+        // Handle cluster data
         $cluster_info = [];
+        $visualization = $cluster_info['visualization'] ?? null;
+        // dd($upload);
         if ($upload->cluster_data) {
-            $cluster_info = json_decode($upload->cluster_data, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                Log::error('Invalid cluster_data JSON', [
+            try {
+                $cluster_info = json_decode($upload->cluster_data, true, 512, JSON_THROW_ON_ERROR);
+                $file = UploadLog::findOrFail($upload_id);
+                $filePath = storage_path('app/public/uploads/toefl/' . $file->file_name);
+
+                $response = Http::timeout(120)
+                    ->attach('file', file_get_contents($filePath), $file->file_name)
+                    ->post('http://127.0.0.1:5000/cluster');
+
+                if (!$response->successful()) {
+                    throw new \Exception('API Error: ' . $response->body());
+                }
+
+                $apiResult = $response->json();
+                // dd($apiResult);
+                $gambar = $apiResult["data"]["visualization"];
+                // dd($gambar);
+
+
+                // Validasi struktur data
+                if (!isset($cluster_info['centroids'])) {
+                    $cluster_info['centroids'] = [];
+                }
+                if (!isset($cluster_info['recommendations'])) {
+                    $cluster_info['recommendations'] = [];
+                }
+                if ($visualization) {
+                    // Bersihkan whitespace
+                    $visualization = trim($visualization);
+
+                    // Pastikan format data URI benar
+                    if (!str_starts_with($visualization, 'data:image')) {
+                        // Hanya tambahkan prefix jika string tidak kosong
+                        $visualization = !empty($visualization) ? 'data:image/png;base64,' . $visualization : null;
+                    }
+
+                    // Validasi base64
+                    if ($visualization && !base64_decode(explode(',', $visualization)[1] ?? '', true)) {
+                        $visualization = null; // Invalid base64
+                    }
+                }
+                // dd($visualization);
+            } catch (\JsonException $e) {
+                Log::error('Failed to decode cluster data', [
                     'upload_id' => $upload_id,
-                    'error' => json_last_error_msg()
+                    'error' => $e->getMessage()
                 ]);
-                // Tetap lanjutkan dengan array kosong
                 $cluster_info = [];
             }
         }
@@ -599,7 +676,8 @@ class KlasterisasiController extends Controller
             'results' => $upload->clusterResults,
             'cluster_info' => $cluster_info,
             'upload' => $upload,
-            'visualization' => $apiResult['data']['visualization'] ?? null,
+            'visualization' => $gambar,
+            'cluster_counts' => $clusterCounts // Kirim data counts ke view
         ]);
     }
 

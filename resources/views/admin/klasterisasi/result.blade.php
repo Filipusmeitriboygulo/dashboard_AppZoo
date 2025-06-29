@@ -1,272 +1,534 @@
 @extends('layouts.auth')
 
 @section('content')
-    <div class="container-fluid">
+    <div class="container-fluid px-4">
         <div class="row">
-            <div class="col-md-12">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="mb-0">
-                            <i class="fas fa-chart-pie"></i> Hasil Klasterisasi TOEFL
-                            <small class="float-end">
-                                Upload ID: {{ $upload->id }} |
-                                Tanggal: {{ $upload->created_at->format('d/m/Y H:i') }}
-                            </small>
-                        </h3>
+            <div class="col-12">
+                <!-- Enhanced Header Card -->
+                <div class="card shadow-sm mb-4 border-0" style="border-radius: 12px;">
+                    <div class="card-header bg-gradient-primary text-white py-3" style="border-radius: 12px 12px 0 0;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1">
+                                    <i class="fas fa-chart-network me-2"></i> Hasil Klasterisasi TOEFL
+                                </h3>
+                                <div class="d-flex align-items-center mt-2">
+                                    <span class="badge bg-white text-primary me-2">
+                                        <i class="fas fa-hashtag me-1"></i> Upload ID: {{ $upload->id }}
+                                    </span>
+                                    <span class="text-white-50">
+                                        <i class="far fa-clock me-1"></i> {{ $upload->created_at->format('d/m/Y H:i') }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="badge bg-white text-primary py-2">
+                                    <i class="fas fa-users me-1"></i> {{ $results->count() }} Mahasiswa
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if ($upload->clusterResults->isEmpty())
+                    <div class="alert alert-warning shadow-sm">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-circle fs-4 me-3"></i>
+                            <div>
+                                <h5 class="alert-heading mb-1">Data hasil klasterisasi belum tersedia</h5>
+                                <p class="mb-0">Silakan tunggu atau lakukan proses klasterisasi terlebih dahulu</p>
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <!-- Main Content Grid -->
+                    <div class="row g-4 mb-4">
+                        <!-- Visualization Card -->
+                        <div class="col-lg-7">
+                            <div class="card h-100 shadow-sm border-0" style="border-radius: 12px;">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center"
+                                    style="border-radius: 12px 12px 0 0;">
+                                    <h4 class="mb-0 text-dark">
+                                        <i class="fas fa-project-diagram me-2"></i> Visualisasi Klaster
+                                    </h4>
+                                    @if ($visualization)
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleFullscreen(this)">
+                                            <i class="fas fa-expand"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                                <div class="card-body p-4">
+                                    @if ($visualization)
+                                        <div class="text-center" id="visualization-container">
+                                            <img src="{{ $visualization }}"
+                                                class="img-fluid rounded shadow visualization-img"
+                                                style="max-height: 400px; width: auto;"
+                                                alt="Visualisasi Hasil Klasterisasi TOEFL">
+                                            <div class="mt-3">
+                                                <small class="text-muted">Distribusi mahasiswa berdasarkan klaster skor
+                                                    TOEFL</small>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="alert alert-info m-0">
+                                            <i class="fas fa-info-circle me-2"></i> Data visualisasi belum tersedia
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Distribution Card -->
+                        <div class="col-lg-5">
+                            <div class="card h-100 shadow-sm border-0" style="border-radius: 12px;">
+                                <div class="card-header bg-white" style="border-radius: 12px 12px 0 0;">
+                                    <h4 class="mb-0 text-dark">
+                                        <i class="fas fa-chart-pie me-2"></i> Distribusi Cluster
+                                    </h4>
+                                </div>
+                                <div class="card-body pt-0 position-relative" style="min-height: 300px;">
+                                    <div class="chart-container" style="height: 250px; position: relative;">
+                                        <canvas id="clusterBarChart"></canvas>
+                                        <div id="chartError"
+                                            class="alert alert-danger d-none position-absolute top-50 start-50 translate-middle w-75">
+                                        </div>
+                                        <div id="chartLoading" class="position-absolute top-50 start-50 translate-middle">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 text-center">
+                                        <small class="text-muted">Distribusi mahasiswa per klaster</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="card-body">
-                        @if ($upload->clusterResults->isEmpty())
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle"></i> Data hasil klasterisasi belum tersedia
-                            </div>
-                        @else
-                            <!-- Visualisasi 3D -->
-                            {{-- <pre>{{ Str::limit($visualization, 100) }}</pre> lihat sebagian base64 --}}
-                            <div class="row mb-4">
-                                <div class="col-md-12">
-                                    <div class="card">
-                                        <div class="card-header bg-info text-white">
-                                            <h4><i class="fas fa-project-diagram"></i> Visualisasi Cluster</h4>
-                                        </div>
-                                        <div class="card-body text-center">
-                                            @if ($visualization)
-                                            <div class="my-4 text-center">
-                                                <h5>Visualisasi Klasterisasi</h5>
-                                                <img src="{{ $visualization }}" class="img-fluid" />
+                    <!-- Recommendations Section -->
+                    @if (isset($cluster_info['recommendations']))
+                        <div class="card shadow-sm mb-4 border-0" style="border-radius: 12px;">
 
-                                            </div>
-                                        @else
-                                            <p class="text-danger">Gambar visualisasi tidak tersedia.</p>
-                                        @endif
-                                        
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Statistik Cluster -->
-                            <div class="row mb-4">
-                                <div class="col-md">
-                                    <div class="card h-100">
-                                        <div class="card-header bg-success text-white">
-                                            <h4><i class="fas fa-chart-pie"></i> Distribusi Cluster</h4>
-                                        </div>
-                                        <div class="card-body">
-                                            <canvas id="clusterChart" height="250"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- <div class="col-md-6">
-                                    <div class="card h-100">
-                                        <div class="card-header bg-success text-white">
-                                            <h4><i class="fas fa-shapes"></i> Informasi Cluster</h4>
-                                        </div>
-                                        {{-- <div class="card-body">
-                                            @if (isset($cluster_info['centroids']))
-                                                <div class="table-responsive">
-                                                    <table class="table table-bordered">
-                                                        <thead class="table-light">
-                                                            <tr>
-                                                                <th>Cluster</th>
-                                                                <th>Listening</th>
-                                                                <th>Structure</th>
-                                                                <th>Reading</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach ($ ['centroids'] as $cluster => $centroid)
-                                                                <tr>
-                                                                    <td>Cluster {{ $cluster }}</td>
-                                                                    <td>{{ number_format($centroid[0], 2) }}</td>
-                                                                    <td>{{ number_format($centroid[1], 2) }}</td>
-                                                                    <td>{{ number_format($centroid[2], 2) }}</td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            @else
-                                                <div class="alert alert-info">
-                                                    Data centroid tidak tersedia
-                                                </div>
-                                            @endif
-                                        </div> --}}
-                                    {{-- </div> --}}
-                                {{-- </div> --}} 
-                            </div>
-
-                            <!-- Rekomendasi -->
-                            @if (isset($cluster_info['recommendations']))
-                                <div class="card mb-4">
-                                    <div class="card-header bg-warning text-dark">
-                                        <h4><i class="fas fa-lightbulb"></i> Rekomendasi Pembelajaran</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        @foreach ($cluster_info['recommendations'] as $cluster => $rec)
-                                            <div class="mb-4 p-3 border rounded">
-                                                <h5 class="d-flex align-items-center">
-                                                    <span
-                                                        class="badge bg-{{ $cluster == 1 ? 'danger' : ($cluster == 2 ? 'warning' : 'success') }} me-2">
+                            <div class="card-body p-4">
+                                <div class="row g-4">
+                                    @foreach ($cluster_info['recommendations'] as $cluster => $rec)
+                                        <div class="col-md-4">
+                                            <div class="card h-100 border-0 shadow-sm">
+                                                <div
+                                                    class="card-header bg-{{ $cluster == 1 ? 'danger' : ($cluster == 2 ? 'warning' : 'success') }} text-white">
+                                                    <h5 class="mb-0">
+                                                        <i
+                                                            class="fas fa-{{ $cluster == 1 ? 'exclamation-triangle' : ($cluster == 2 ? 'hourglass-half' : 'check-circle') }} me-2"></i>
                                                         Cluster {{ $cluster }}
-                                                    </span>
-                                                </h5>
-                                                <ul>
-                                                    @foreach ($rec as $item)
-                                                        <li>{{ $item }}</li>
-                                                    @endforeach
-                                                </ul>
+                                                    </h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <ul class="list-unstyled mb-0">
+                                                        @foreach ($rec as $item)
+                                                            <li class="mb-2 d-flex align-items-start">
+                                                                <span
+                                                                    class="badge bg-{{ $cluster == 1 ? 'danger' : ($cluster == 2 ? 'warning' : 'success') }} me-2 mt-1"
+                                                                    style="min-width: 20px;">
+                                                                    <i class="fas fa-arrow-right"
+                                                                        style="font-size: 0.7rem;"></i>
+                                                                </span>
+                                                                <span>{{ $item }}</span>
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
                                             </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
-
-                            <!-- Tabel Hasil Lengkap -->
-                            <div class="card">
-                                <div class="card-header bg-primary text-white">
-                                    <h4><i class="fas fa-table"></i> Detail Hasil Klasterisasi</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-hover" id="resultsTable">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>No</th>
-                                                    <th>Nama</th>
-                                                    <th>NIM</th>
-                                                    <th>Listening</th>
-                                                    <th>Structure</th>
-                                                    <th>Reading</th>
-                                                    <th>Total</th>
-                                                    <th>Cluster</th>
-                                                    <th>Membership</th>
-                                                    <th>Insight</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($results as $result)
-                                                    <tr>
-                                                        <td>{{ $loop->iteration }}</td>
-                                                        <td>{{ $result->toeflScoreEntry->nama ?? '-' }}</td>
-                                                        <td>{{ $result->toeflScoreEntry->nim ?? '-' }}</td>
-                                                        <td>{{ $result->toeflScoreEntry->listening ?? '-' }}</td>
-                                                        <td>{{ $result->toeflScoreEntry->structure ?? '-' }}</td>
-                                                        <td>{{ $result->toeflScoreEntry->reading ?? '-' }}</td>
-                                                        <td>{{ $result->toeflScoreEntry->total_score ?? '-' }}</td>
-                                                        <td>
-                                                            <span
-                                                                class="badge bg-{{ $result->cluster == 1 ? 'danger' : ($result->cluster == 2 ? 'warning' : 'success') }}">
-                                                                Cluster {{ $result->cluster }}
-                                                            </span>
-                                                        </td>
-                                                        <td>
-                                                            <ul class="mb-0 ps-3">
-                                                                <li>Cluster 1:
-                                                                    {{ round($result->membership_cluster1 * 100, 1) }}%
-                                                                </li>
-                                                                <li>Cluster 2:
-                                                                    {{ round($result->membership_cluster2 * 100, 1) }}%
-                                                                </li>
-                                                                <li>Cluster 3:
-                                                                    {{ round($result->membership_cluster3 * 100, 1) }}%
-                                                                </li>
-                                                            </ul>
-                                                        </td>
-                                                        <td>{{ $result->insight }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                        </div>
+                                    @endforeach
                                 </div>
                             </div>
-                        @endif
+                        </div>
+                    @endif
+
+                    <!-- Results Table -->
+                    <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px;">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center"
+                            style="border-radius: 12px 12px 0 0;">
+                            <h4 class="mb-0 text-dark">
+                                <i class="fas fa-table me-2"></i> Detail Hasil Klasterisasi
+                            </h4>
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary me-2" id="exportExcel">
+                                    <i class="fas fa-file-excel me-1"></i> Excel
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" id="exportPDF">
+                                    <i class="fas fa-file-pdf me-1"></i> PDF
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0" id="resultsTable">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th width="50">No</th>
+                                            <th>Mahasiswa</th>
+                                            <th>NIM</th>
+                                            <th>Listening</th>
+                                            <th>Structure</th>
+                                            <th>Reading</th>
+                                            <th>Total</th>
+                                            <th>Cluster</th>
+                                            <th>Membership</th>
+                                            <th>Insight</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($results as $result)
+                                            <tr>
+                                                <td class="align-middle">{{ $loop->iteration }}</td>
+                                                <td class="align-middle">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center"
+                                                            style="width: 32px; height: 32px;">
+                                                            {{ substr($result->toeflScoreEntry->nama ?? '?', 0, 1) }}
+                                                        </div>
+                                                        <span>{{ $result->toeflScoreEntry->nama ?? '-' }}</span>
+                                                    </div>
+                                                </td>
+                                                <td class="align-middle">{{ $result->toeflScoreEntry->nim ?? '-' }}</td>
+                                                <td class="align-middle">{{ $result->toeflScoreEntry->listening ?? '-' }}
+                                                </td>
+                                                <td class="align-middle">{{ $result->toeflScoreEntry->structure ?? '-' }}
+                                                </td>
+                                                <td class="align-middle">{{ $result->toeflScoreEntry->reading ?? '-' }}
+                                                </td>
+                                                <td class="align-middle">
+                                                    <strong>{{ $result->toeflScoreEntry->total_score ?? '-' }}</strong>
+                                                </td>
+                                                <td class="align-middle">
+                                                    <span
+                                                        class="badge bg-{{ $result->cluster == 1 ? 'danger' : ($result->cluster == 2 ? 'warning' : 'success') }} py-2">
+                                                        Cluster {{ $result->cluster }}
+                                                    </span>
+                                                </td>
+                                                <td class="align-middle">
+                                                    <div class="progress-thin mb-1" style="height: 10px;">
+                                                        <div class="progress-bar bg-danger"
+                                                            style="width: {{ $result->membership_cluster1 * 100 }}%">
+                                                        </div>
+                                                        <div class="progress-bar bg-warning"
+                                                            style="width: {{ $result->membership_cluster2 * 100 }}%">
+                                                        </div>
+                                                        <div class="progress-bar bg-success"
+                                                            style="width: {{ $result->membership_cluster3 * 100 }}%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between small text-muted">
+                                                        <span>{{ round($result->membership_cluster1 * 100, 1) }}%</span>
+                                                        <span>{{ round($result->membership_cluster2 * 100, 1) }}%</span>
+                                                        <span>{{ round($result->membership_cluster3 * 100, 1) }}%</span>
+                                                    </div>
+                                                </td>
+                                                <td class="align-middle">
+                                                    <button class="btn btn-sm btn-outline-secondary insight-btn"
+                                                        data-bs-toggle="tooltip" title="Lihat insight"
+                                                        data-insight="{{ $result->insight }}">
+                                                        <i class="fas fa-info-circle"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- Insight Modal -->
+    <div class="modal fade" id="insightModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-info-circle me-2"></i> Detail Insight
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="insightContent">
+                    Loading insight...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                 </div>
             </div>
         </div>
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Pie Chart untuk Distribusi Cluster
-        $(document).ready(function() {
-            // Hitung distribusi cluster
-            let clusterCounts = {
-                1: 0,
-                2: 0,
-                3: 0
-            };
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Chart
+            const initClusterChart = () => {
+                const ctx = document.getElementById('clusterBarChart');
+                const chartError = document.getElementById('chartError');
+                const chartLoading = document.getElementById('chartLoading');
 
-            @foreach ($results as $result)
-                clusterCounts[{{ $result->cluster }}]++;
-            @endforeach
+                try {
+                    // Data from controller
+                    const clusterData = @json($cluster_counts);
 
-            // Buat chart
-            const ctx = document.getElementById('clusterChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Cluster 1', 'Cluster 2', 'Cluster 3'],
-                    datasets: [{
-                        data: [clusterCounts[1], clusterCounts[2], clusterCounts[3]],
-                        backgroundColor: [
-                            '#dc3545', // Cluster 1 (Danger)
-                            '#ffc107', // Cluster 2 (Warning)
-                            '#28a745' // Cluster 3 (Success)
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
+                    if (!clusterData || Object.keys(clusterData).length === 0) {
+                        throw new Error('Data klaster tidak tersedia');
+                    }
+
+                    // Calculate total for percentages
+                    const total = Object.values(clusterData).reduce((sum, count) => sum + count, 0);
+
+                    // Prepare chart data
+                    const labels = Object.keys(clusterData).map(key => `Cluster ${key.split('_')[1]}`);
+                    const data = Object.values(clusterData);
+                    const backgroundColors = [
+                        'rgba(220, 53, 69, 0.7)', // Cluster 1 - danger
+                        'rgba(255, 193, 7, 0.7)', // Cluster 2 - warning
+                        'rgba(25, 135, 84, 0.7)' // Cluster 3 - success
+                    ];
+
+                    // Chart configuration
+                    const config = {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Jumlah Mahasiswa',
+                                data: data,
+                                backgroundColor: backgroundColors,
+                                borderColor: backgroundColors.map(color => color.replace('0.7',
+                                    '1')),
+                                borderWidth: 1,
+                                borderRadius: 4,
+                                barPercentage: 0.7
+                            }]
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = Math.round((value / total) * 100);
-                                    return `${label}: ${value} (${percentage}%)`;
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const percentage = (context.raw / total * 100).toFixed(1);
+                                            return `${context.raw} mahasiswa (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        precision: 0,
+                                        stepSize: 1
+                                    },
+                                    grid: {
+                                        drawBorder: false
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
                                 }
                             }
                         }
-                    }
+                    };
+
+                    // Hide loading and render chart
+                    chartLoading.classList.add('d-none');
+                    new Chart(ctx, config);
+
+                } catch (error) {
+                    console.error('Error creating chart:', error);
+                    chartLoading.classList.add('d-none');
+                    chartError.classList.remove('d-none');
+                    chartError.textContent = 'Gagal memuat data distribusi klaster: ' + error.message;
                 }
+            };
+
+            // Initialize tooltips
+            const initTooltips = () => {
+                const tooltipTriggerList = [].slice.call(document.querySelectorAll(
+                    '[data-bs-toggle="tooltip"]'));
+                tooltipTriggerList.map(function(tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            };
+
+            // Initialize insight modal
+            const initInsightModal = () => {
+                const insightButtons = document.querySelectorAll('.insight-btn');
+                const insightModal = new bootstrap.Modal(document.getElementById('insightModal'));
+                const insightContent = document.getElementById('insightContent');
+
+                insightButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const insight = this.getAttribute('data-insight');
+                        insightContent.textContent = insight || 'Tidak ada insight tersedia';
+                        insightModal.show();
+                    });
+                });
+            };
+
+            // Initialize all components
+            initClusterChart();
+            initTooltips();
+            initInsightModal();
+
+            // Fungsi Toggle Screen Visualisasi 
+            function toggleFullscreen(button) {
+                const cardBody = button.closest('.card-body');
+                const img = cardBody.querySelector('img');
+
+                if (!img) return;
+
+                if (img.classList.contains('fullscreen-img')) {
+                    // Kembali ke ukuran normal
+                    img.classList.remove('fullscreen-img');
+                    button.innerHTML = '<i class="fas fa-expand"></i>';
+                } else {
+                    // Masuk ke mode fullscreen
+                    img.classList.add('fullscreen-img');
+                    button.innerHTML = '<i class="fas fa-compress"></i>';
+                }
+            }
+
+            // Export buttons functionality
+            document.getElementById('exportExcel')?.addEventListener('click', function() {
+                // Add Excel export functionality here
+                console.log('Export to Excel clicked');
             });
 
-            // DataTable
-            $('#resultsTable').DataTable({
-                responsive: true,
-                dom: '<"top"Bf>rt<"bottom"lip><"clear">',
-                buttons: [
-                    'copy', 'excel', 'pdf'
-                ],
-                pageLength: 25,
-                order: [
-                    [7, 'asc']
-                ],
-                language: {
-                    search: "_INPUT_",
-                    searchPlaceholder: "Cari data...",
-                    lengthMenu: "Tampilkan _MENU_ data per halaman",
-                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                    paginate: {
-                        first: "Pertama",
-                        last: "Terakhir",
-                        next: "Selanjutnya",
-                        previous: "Sebelumnya"
-                    }
-                }
+            document.getElementById('exportPDF')?.addEventListener('click', function() {
+                // Add PDF export functionality here
+                console.log('Export to PDF clicked');
             });
         });
     </script>
+@endpush
+
+@section('styles')
+    <style>
+        /* Improved chart styling */
+        g .chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+
+        #clusterBarChart {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Loading states */
+        #chartLoading {
+            z-index: 10;
+        }
+
+        #chartError {
+            z-index: 5;
+        }
+
+        /* Card improvements */
+        .card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: none;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            font-weight: 600;
+        }
+
+        /* Table improvements */
+        .table {
+            font-size: 0.9rem;
+        }
+
+        .table th {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        .thead-light th {
+            background-color: #f8f9fa;
+        }
+
+        /* Avatar styling */
+        .avatar {
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Progress bar styling */
+        .progress-thin {
+            height: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            transition: width 0.6s ease;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 200px;
+            }
+
+            .table-responsive {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Badge improvements */
+        .badge {
+            font-weight: 500;
+            padding: 5px 10px;
+        }
+
+        /* style fungsi toggle  */
+        .fullscreen-img {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            cursor: zoom-out;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+    </style>
 @endsection
