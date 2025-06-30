@@ -61,9 +61,9 @@
                                     @if ($visualization)
                                         <div class="text-center" id="visualization-container">
                                             <img src="{{ $visualization }}"
-                                                class="img-fluid rounded shadow visualization-img"
-                                                style="max-height: 400px; width: auto;"
-                                                alt="Visualisasi Hasil Klasterisasi TOEFL">
+                                                class="img-fluid rounded shadow visualization-img thumbnail"
+                                                style="max-height: 400px; width: auto; cursor: pointer;"
+                                                alt="Visualisasi Hasil Klasterisasi TOEFL" onclick="openLightbox(this)">
                                             <div class="mt-3">
                                                 <small class="text-muted">Distribusi mahasiswa berdasarkan klaster skor
                                                     TOEFL</small>
@@ -76,7 +76,17 @@
                                     @endif
                                 </div>
                             </div>
+                            <div id="lightbox" class="lightbox">
+                                <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+                                <div class="lightbox-content">
+                                    <img id="lightbox-image" class="lightbox-image" src="">
+                                    <div class="lightbox-caption" id="lightbox-caption"></div>
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- Lightbox HTML -->
+
 
 
                         <!-- Distribution Card -->
@@ -392,33 +402,75 @@
             initInsightModal();
 
             // Fungsi Toggle Screen Visualisasi 
+            // Lightbox functionality
+            document.addEventListener('DOMContentLoaded', function() {
+                // Get the lightbox elements
+                const lightbox = document.getElementById('custom-lightbox');
+                const lightboxImg = document.getElementById('custom-lightbox-img');
+                const lightboxCaption = document.getElementById('custom-lightbox-caption');
+                const closeBtn = document.querySelector('.custom-lightbox-close');
+
+                // Get all trigger elements
+                const triggers = document.querySelectorAll('.lightbox-trigger');
+
+                // Add click event to all triggers
+                triggers.forEach(trigger => {
+                    trigger.addEventListener('click', function() {
+                        lightbox.style.display = 'block';
+                        lightboxImg.src = this.src;
+                        lightboxCaption.innerHTML = this.alt;
+                        document.body.style.overflow = 'hidden'; // Disable scrolling
+                    });
+                });
+
+                // Close lightbox
+                closeBtn.addEventListener('click', function() {
+                    lightbox.style.display = 'none';
+                    document.body.style.overflow = 'auto'; // Enable scrolling
+                });
+
+                // Close when clicking outside image
+                lightbox.addEventListener('click', function(e) {
+                    if (e.target === lightbox) {
+                        lightbox.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+
+                // Close with ESC key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && lightbox.style.display === 'block') {
+                        lightbox.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+            });
+
+            // Original fullscreen function
             function toggleFullscreen(button) {
-                const cardBody = button.closest('.card-body');
-                const img = cardBody.querySelector('img');
-
-                if (!img) return;
-
-                if (img.classList.contains('fullscreen-img')) {
-                    // Kembali ke ukuran normal
-                    img.classList.remove('fullscreen-img');
-                    button.innerHTML = '<i class="fas fa-expand"></i>';
+                const container = document.getElementById('visualization-container');
+                if (!document.fullscreenElement) {
+                    if (container.requestFullscreen) {
+                        container.requestFullscreen();
+                        button.innerHTML = '<i class="fas fa-compress"></i>';
+                    }
                 } else {
-                    // Masuk ke mode fullscreen
-                    img.classList.add('fullscreen-img');
-                    button.innerHTML = '<i class="fas fa-compress"></i>';
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                        button.innerHTML = '<i class="fas fa-expand"></i>';
+                    }
                 }
             }
 
             // Export buttons functionality
             document.getElementById('exportExcel')?.addEventListener('click', function() {
-                // Add Excel export functionality here
-                console.log('Export to Excel clicked');
+                window.location.href = '{{ route('export.excel', ['upload_id' => $upload->id]) }}';
             });
 
             document.getElementById('exportPDF')?.addEventListener('click', function() {
-                // Add PDF export functionality here
-                console.log('Export to PDF clicked');
+                window.location.href = '{{ route('export.pdf', ['upload_id' => $upload->id]) }}';
             });
+
         });
     </script>
 @endpush
@@ -529,6 +581,61 @@
             cursor: zoom-out;
             padding: 20px;
             box-sizing: border-box;
+        }
+
+
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            text-align: center;
+        }
+
+        .lightbox-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .lightbox-image {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .lightbox-caption {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            padding: 10px 0;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .thumbnail {
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .thumbnail:hover {
+            opacity: 0.8;
         }
     </style>
 @endsection

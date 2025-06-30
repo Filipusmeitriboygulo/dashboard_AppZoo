@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DataUploadController;
 use App\Http\Controllers\Admin\KlasterisasiController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\KepalaUPA\KepalaUPAController;
 use App\Http\Controllers\KetuaJurusan\KetuaJurusanController;
 use App\Http\Controllers\KetuaProdi\KetuaProdiController;
@@ -38,7 +39,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     // Route::get('data-upload/scores/{file}', [DataUploadController::class, 'viewScores'])->name('admin.data-upload.scores');
     // Route::post('/data-upload/upload', [UploadLogController::class, 'upload'])->name('toefl.upload');
     // Route::post('/data-upload/process', [UploadLogController::class, 'process'])->name('admin.data-upload.process');
-    
+
     // File Upload
     Route::get('/data-upload', [UploadLogController::class, 'index'])->name('admin.data-upload.index');
     Route::post('/data/upload', [DataUploadController::class, 'upload'])->name('data.upload');
@@ -55,6 +56,10 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::post('/klasterisasi/analyze', [KlasterisasiController::class, 'analyze'])->name('klasterisasi.analyze');
     Route::post('/klasterisasi/reanalyze/{id}', [KlasterisasiController::class, 'reanalyze'])->name('klasterisasi.reanalyze');
     Route::get('/klasterisasi/result/{upload_id}', [KlasterisasiController::class, 'result'])->name('klasterisasi.result');
+
+    // Export Controller
+    Route::get('/export-excel/{upload_id}', [ExportController::class, 'exportExcel'])->name('export.excel');
+    Route::get('/export-pdf/{upload_id}', [ExportController::class, 'exportPdf'])->name('export.pdf');
 });
 
 
@@ -77,6 +82,7 @@ Route::prefix('ketua-prodi')->middleware('role:ketua_prodi')->group(function () 
 Route::prefix('wakil-direktur')->middleware('role:wakil_direktur')->group(function () {
     Route::get('/dashboard', [WakilDirekturController::class, 'dashboard'])->name('wakil-direktur.dashboard');
 });
+
 
 
 
