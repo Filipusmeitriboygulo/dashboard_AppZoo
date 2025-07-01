@@ -58,14 +58,14 @@
                     </a>
                 </li>
 
-                <li class="sidebar-item">
+                {{-- <li class="sidebar-item">
                     <a class="sidebar-link" aria-expanded="false">
                         <span>
                             <i class="ti ti-file-description"></i>
                         </span>
                         <span class="hide-menu">LAPORAN</span>
                     </a>
-                </li>
+                </li> --}}
 
 
             </ul>
