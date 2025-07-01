@@ -49,6 +49,14 @@
                         </a>
                     </li>
                 @endif
+                <li class="sidebar-item">
+                    <a class="sidebar-link" aria-expanded="false" href="{{ route('admin.users.index') }}">
+                        <span>
+                            <i class="ti ti-file-description"></i>
+                        </span>
+                        <span class="hide-menu">USER</span>
+                    </a>
+                </li>
 
                 <li class="sidebar-item">
                     <a class="sidebar-link" aria-expanded="false">
@@ -58,6 +66,7 @@
                         <span class="hide-menu">LAPORAN</span>
                     </a>
                 </li>
+
 
             </ul>
         </nav>

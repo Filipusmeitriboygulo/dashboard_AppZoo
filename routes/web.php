@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DataUploadController;
 use App\Http\Controllers\Admin\KlasterisasiController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\KepalaUPA\KepalaUPAController;
 use App\Http\Controllers\KetuaJurusan\KetuaJurusanController;
@@ -60,6 +61,10 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     // Export Controller
     Route::get('/export-excel/{upload_id}', [ExportController::class, 'exportExcel'])->name('export.excel');
     Route::get('/export-pdf/{upload_id}', [ExportController::class, 'exportPdf'])->name('export.pdf');
+
+    // Tambah User
+    Route::get('/users', [UserController::class, 'index'])->name('admin.users.index');
+    Route::post('/users', [UserController::class, 'store'])->name('admin.users.store');
 });
 
 
