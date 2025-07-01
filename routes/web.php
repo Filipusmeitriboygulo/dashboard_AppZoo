@@ -56,7 +56,9 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
 
 // Kepala UPA routes
 Route::prefix('kepala-upa')->middleware('role:kepala_upa')->group(function () {
-    Route::get('/dashboard', [KepalaUPAController::class, 'dashboard'])->name('kepala-upa.dashboard');
+    Route::get('/dashboard', [KepalaUPAController::class, 'index'])->name('kepala-upa.dashboard');
+    Route::get('/klasterisasi/result/{upload_id}', [KepalaUPAController::class,])->name('kepala-upa.result');
+    // Route::get('/dashboard', [KepalaUPAController::class, 'dashboard'])->name('kepala-upa.dashboard');
 });
 
 // Ketua Jurusan routes
