@@ -14,16 +14,12 @@ class ClusterResult extends Model
         'toefl_score_entry_id', // Tambahkan relasi ke tabel utama
         'upload_id', // Tetap pertahankan untuk query langsung
         'cluster',
-        'membership_cluster1',
-        'membership_cluster2',
-        'membership_cluster3',
+        'membership',
         'insight'
     ];
 
     protected $casts = [
-        'membership_cluster1' => 'float',
-        'membership_cluster2' => 'float',
-        'membership_cluster3' => 'float',
+        'membership' => 'array',
     ];
 
 

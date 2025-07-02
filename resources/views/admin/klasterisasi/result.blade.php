@@ -88,7 +88,6 @@
                         <!-- Lightbox HTML -->
 
 
-
                         <!-- Distribution Card -->
                         <div class="col-lg-5">
                             <div class="card h-100 shadow-sm border-0" style="border-radius: 12px;">
@@ -221,22 +220,30 @@
                                                 </td>
                                                 <td class="align-middle">
                                                     <div class="progress-thin mb-1" style="height: 10px;">
-                                                        <div class="progress-bar bg-danger"
-                                                            style="width: {{ $result->membership_cluster1 * 100 }}%">
-                                                        </div>
-                                                        <div class="progress-bar bg-warning"
-                                                            style="width: {{ $result->membership_cluster2 * 100 }}%">
-                                                        </div>
-                                                        <div class="progress-bar bg-success"
-                                                            style="width: {{ $result->membership_cluster3 * 100 }}%">
-                                                        </div>
+                                                        @foreach (collect($result->membership)->sortKeys() as $key => $value)
+                                                            @php
+                                                                // Atur warna berdasarkan urutan cluster
+                                                                $colors = [
+                                                                    'bg-danger',
+                                                                    'bg-warning',
+                                                                    'bg-success',
+                                                                    'bg-primary',
+                                                                    'bg-info',
+                                                                    'bg-dark',
+                                                                ];
+                                                                $color = $colors[$loop->index % count($colors)];
+                                                            @endphp
+                                                            <div class="progress-bar {{ $color }}"
+                                                                style="width: {{ $value * 100 }}%"></div>
+                                                        @endforeach
                                                     </div>
                                                     <div class="d-flex justify-content-between small text-muted">
-                                                        <span>{{ round($result->membership_cluster1 * 100, 1) }}%</span>
-                                                        <span>{{ round($result->membership_cluster2 * 100, 1) }}%</span>
-                                                        <span>{{ round($result->membership_cluster3 * 100, 1) }}%</span>
+                                                        @foreach (collect($result->membership)->sortKeys() as $key => $value)
+                                                            <span>{{ round($value * 100, 1) }}%</span>
+                                                        @endforeach
                                                     </div>
                                                 </td>
+
                                                 <td class="align-middle">
                                                     <button class="btn btn-sm btn-outline-secondary insight-btn"
                                                         data-bs-toggle="tooltip" title="Lihat insight"

@@ -9,9 +9,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    <li class="nav-item px-3">
+                    {{-- <li class="nav-item px-3">
                         <button type="button" class="btn btn-custom "><a href="{{ route('register') }}" class="text-decoration-none text-dark">Register</a></button>
-                    </li>
+                    </li> --}}
                     <li class="nav-item px-3">
                         <button type="button" class="btn btn-custom "><a href="{{ route('login') }}" class="text-decoration-none text-dark">Login</a></button>
                     </li>

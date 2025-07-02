@@ -16,7 +16,11 @@ class KepalaUPAController extends Controller
     }
     public function result($upload_id)
     {
-        $upload = UploadLog::with(['clusterResults', 'clusterResults.toeflScoreEntry'])->findOrFail($upload_id);
+        // Ambil upload yang sudah diklasterisasi saja
+        $upload = UploadLog::with(['clusterResults', 'clusterResults.toeflScoreEntry'])
+            ->where('id', $upload_id)
+            ->where('status_klasterisasi', 'sudah') // pastikan hanya yang "sudah"
+            ->firstOrFail();
 
         // Hitung jumlah per cluster untuk chart
         $clusterCounts = [
@@ -25,19 +29,21 @@ class KepalaUPAController extends Controller
             'cluster_3' => $upload->clusterResults->where('cluster', 3)->count()
         ];
 
-
-        // Handle cluster data
+        // Persiapan variabel default
         $cluster_info = [];
-        $visualization = $cluster_info['visualization'] ?? null;
-        // dd($upload);
+        $visualization = null;
+
         if ($upload->cluster_data) {
             try {
+                // Decode cluster_data dari kolom database
                 $cluster_info = json_decode($upload->cluster_data, true, 512, JSON_THROW_ON_ERROR);
-                $file = UploadLog::findOrFail($upload_id);
-                $filePath = storage_path('app/public/uploads/toefl/' . $file->file_name);
 
+                // Ambil path file untuk dikirim ke API Python
+                $filePath = storage_path('app/public/uploads/toefl/' . $upload->file_name);
+
+                // Panggil ulang API visualisasi (jika dibutuhkan)
                 $response = Http::timeout(120)
-                    ->attach('file', file_get_contents($filePath), $file->file_name)
+                    ->attach('file', file_get_contents($filePath), $upload->file_name)
                     ->post('http://127.0.0.1:5000/cluster');
 
                 if (!$response->successful()) {
@@ -45,40 +51,32 @@ class KepalaUPAController extends Controller
                 }
 
                 $apiResult = $response->json();
-                // dd($apiResult);
-                $gambar = $apiResult["data"]["visualization"];
-                // dd($gambar);
+                $gambar = $apiResult["data"]["visualization"] ?? null;
 
+                // Cek dan atur ulang key-key cluster_info
+                $cluster_info['centroids'] = $cluster_info['centroids'] ?? [];
+                $cluster_info['recommendations'] = $cluster_info['recommendations'] ?? [];
 
-                // Validasi struktur data
-                if (!isset($cluster_info['centroids'])) {
-                    $cluster_info['centroids'] = [];
+                // Validasi dan ubah visualisasi jadi data URI jika belum
+                if ($gambar && !str_starts_with($gambar, 'data:image')) {
+                    $gambar = 'data:image/png;base64,' . trim($gambar);
                 }
-                if (!isset($cluster_info['recommendations'])) {
-                    $cluster_info['recommendations'] = [];
-                }
-                if ($visualization) {
-                    // Bersihkan whitespace
-                    $visualization = trim($visualization);
 
-                    // Pastikan format data URI benar
-                    if (!str_starts_with($visualization, 'data:image')) {
-                        // Hanya tambahkan prefix jika string tidak kosong
-                        $visualization = !empty($visualization) ? 'data:image/png;base64,' . $visualization : null;
-                    }
-
-                    // Validasi base64
-                    if ($visualization && !base64_decode(explode(',', $visualization)[1] ?? '', true)) {
-                        $visualization = null; // Invalid base64
-                    }
+                if ($gambar && !base64_decode(explode(',', $gambar)[1] ?? '', true)) {
+                    $gambar = null; // Invalid base64 → tidak ditampilkan
                 }
-                // dd($visualization);
             } catch (\JsonException $e) {
-                Log::error('Failed to decode cluster data', [
+                Log::error('Failed to decode cluster_data', [
                     'upload_id' => $upload_id,
                     'error' => $e->getMessage()
                 ]);
                 $cluster_info = [];
+            } catch (\Exception $e) {
+                Log::error('Failed API Request or base64 handling', [
+                    'upload_id' => $upload_id,
+                    'error' => $e->getMessage()
+                ]);
+                $gambar = null;
             }
         }
 
@@ -87,7 +85,7 @@ class KepalaUPAController extends Controller
             'cluster_info' => $cluster_info,
             'upload' => $upload,
             'visualization' => $gambar,
-            'cluster_counts' => $clusterCounts // Kirim data counts ke view
+            'cluster_counts' => $clusterCounts
         ]);
     }
 }

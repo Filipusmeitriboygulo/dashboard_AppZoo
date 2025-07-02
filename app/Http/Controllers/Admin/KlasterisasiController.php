@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class KlasterisasiController extends Controller
 {
@@ -333,9 +334,9 @@ class KlasterisasiController extends Controller
                         ],
                         [
                             'cluster' => (int) $studentData['Cluster'],
-                            'membership_cluster1' => (float) $studentData['Membership_Cluster_1'],
-                            'membership_cluster2' => (float) $studentData['Membership_Cluster_2'],
-                            'membership_cluster3' => (float) $studentData['Membership_Cluster_3'],
+                            'membership' => collect($studentData)->filter(function ($value, $key) {
+                                return Str::startsWith($key, 'Membership_Cluster_');
+                            })->toArray(),
                             'insight' => $studentData['Insight']
                         ]
                     );
@@ -408,11 +409,9 @@ class KlasterisasiController extends Controller
                 ClusterResult::create([
                     'upload_id' => $upload->id,
                     'toefl_score_entry_id' => $entry->id,
-                    'cluster' => $studentData['Cluster'],
-                    'membership_cluster1' => $studentData['Membership_Cluster_1'],
-                    'membership_cluster2' => $studentData['Membership_Cluster_2'],
-                    'membership_cluster3' => $studentData['Membership_Cluster_3'],
-                    'insight' => $studentData['Insight'],
+                    'cluster' => (int) $studentData['Cluster'],
+                    'membership' => json_encode($studentData['membership']),
+                    'insight' => $studentData['Insight']
                 ]);
             }
 
