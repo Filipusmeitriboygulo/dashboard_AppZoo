@@ -40,15 +40,38 @@ Route::get('/klasterisasi/result/{upload_id}', function ($upload_id) {
         return app(KlasterisasiController::class)->result($upload_id);
     } elseif ($user->role === 'kepala_upa') {
         return app(KepalaUPAController::class)->result($upload_id);
+    } elseif ($user->role === 'wakil_direktur') {
+        return app(WakilDirekturController::class)->result($upload_id);
     }
+
 
     abort(403, 'Access denied');
 })->middleware('auth')->name('klasterisasi.result');
 
+Route::get('/klasterisasi', function () {
+    $user = Auth::user();
+
+    if (!$user) {
+        abort(403, 'Unauthorized');
+    }
+
+    switch ($user->role) {
+        case 'admin':
+            return app(KlasterisasiController::class)->index();
+        case 'kepala_upa':
+            return app(KepalaUPAController::class)->index();
+        case 'wakil_direktur':
+            return app(WakilDirekturController::class)->index();
+        default:
+            abort(403, 'Access denied');
+    }
+})->middleware('auth')->name('klasterisasi.index');
+
+
 
 
 Route::prefix('admin')->middleware('role:admin')->group(function () {
-    
+
     Route::get('/home', [DataUploadController::class, 'index'])->name('home');
     // File Upload
     Route::get('/data-upload', [UploadLogController::class, 'index'])->name('admin.data-upload.index');
@@ -56,7 +79,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::get('/data-upload/scores/{uploadId}', [DataUploadController::class, 'viewScores'])->name('data.scores');
     Route::post('/data-upload/scores-delete/{uploadId}', [DataUploadController::class, 'deleteScores'])->name('data.score-delete');
 
-    Route::get('/klasterisasi', [KlasterisasiController::class, 'index'])->name('klasterisasi.index');
+    // Route::get('/klasterisasi', [KlasterisasiController::class, 'index'])->name('klasterisasi.index');
     Route::post('/klasterisasi/analyze', [KlasterisasiController::class, 'analyze'])->name('klasterisasi.analyze');
     Route::post('/klasterisasi/reanalyze/{id}', [KlasterisasiController::class, 'reanalyze'])->name('klasterisasi.reanalyze');
     // Route::get('/klasterisasi/result/{upload_id}', [KlasterisasiController::class, 'result'])->name('klasterisasi.result');
@@ -80,7 +103,10 @@ Route::prefix('kepala-upa')->middleware('role:kepala_upa')->group(function () {
     // Route::get('/klasterisasi/result/{upload_id}', [KepalaUPAController::class, 'result'])->name('kepala-upa.result');
 });
 
-
+// Wakil Direktur routes
+Route::prefix('wakil-direktur')->middleware('role:wakil_direktur')->group(function () {
+    Route::get('/dashboard', [WakilDirekturController::class, 'index'])->name('wakil-direktur.dashboard');
+});
 
 // Ketua Jurusan routes
 Route::prefix('ketua-jurusan')->middleware('role:ketua_jurusan')->group(function () {
@@ -93,9 +119,6 @@ Route::prefix('ketua-prodi')->middleware('role:ketua_prodi')->group(function () 
 });
 
 // Wakil Direktur routes
-Route::prefix('wakil-direktur')->middleware('role:wakil_direktur')->group(function () {
-    Route::get('/dashboard', [WakilDirekturController::class, 'dashboard'])->name('wakil-direktur.dashboard');
-});
 
 
 

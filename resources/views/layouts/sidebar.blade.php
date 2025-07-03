@@ -4,7 +4,13 @@
     {{-- Rule Route --}}
     @php
         $role = auth()->user()->role;
-        $prefix = $role === 'admin' ? 'admin' : ($role === 'kepala_upa' ? 'kepala-upa' : null);
+        $prefix = match ($role) {
+            'admin' => 'admin',
+            'kepala_upa' => 'kepala-upa',
+            'wakil_direktur' => 'wakil-direktur',
+            default => null,
+        };
+
     @endphp
     <div>
         <!-- Logo -->
@@ -42,22 +48,23 @@
                         @endif
 
                         {{-- Tampil untuk semua user login --}}
-                        @if($prefix)
-                        <li class="sidebar-item mt-3">
-                            <a class="sidebar-link" href="{{ route('klasterisasi.index') }}">
-                                <span><i class="ti ti-article"></i></span>
-                                <span class="hide-menu">KLASTERISASI</span>
-                            </a>
-                        </li>
-
-                        @isset($upload)
-                            <li class="sidebar-item">
-                                <a class="sidebar-link" href="{{ route('klasterisasi.result', ['upload_id' => $upload->id]) }}">
-                                    <span><i class="ti ti-cards"></i></span>
-                                    <span class="hide-menu">DASHBOARD</span>
+                        @if ($prefix)
+                            <li class="sidebar-item mt-3">
+                                <a class="sidebar-link" href="{{ route('klasterisasi.index') }}">
+                                    <span><i class="ti ti-article"></i></span>
+                                    <span class="hide-menu">KLASTERISASI</span>
                                 </a>
                             </li>
-                        @endisset
+
+                            @isset($upload)
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link"
+                                        href="{{ route('klasterisasi.result', ['upload_id' => $upload->id]) }}">
+                                        <span><i class="ti ti-cards"></i></span>
+                                        <span class="hide-menu">DASHBOARD</span>
+                                    </a>
+                                </li>
+                            @endisset
                         @endif
                     @endauth
                 </ul>
