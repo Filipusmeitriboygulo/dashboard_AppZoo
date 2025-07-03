@@ -334,9 +334,11 @@ class KlasterisasiController extends Controller
                         ],
                         [
                             'cluster' => (int) $studentData['Cluster'],
-                            'membership' => collect($studentData)->filter(function ($value, $key) {
-                                return Str::startsWith($key, 'Membership_Cluster_');
+                            // Saat menyimpan:
+                            'membership' => collect($studentData['membership'])->mapWithKeys(function ($v, $k) {
+                                return [strval($k) => (float) $v];
                             })->toArray(),
+
                             'insight' => $studentData['Insight']
                         ]
                     );
@@ -410,7 +412,11 @@ class KlasterisasiController extends Controller
                     'upload_id' => $upload->id,
                     'toefl_score_entry_id' => $entry->id,
                     'cluster' => (int) $studentData['Cluster'],
-                    'membership' => json_encode($studentData['membership']),
+                    // Saat menyimpan:
+                    'membership' => collect($studentData['membership'])->mapWithKeys(function ($v, $k) {
+                        return [strval($k) => (float) $v];
+                    })->toArray(),
+
                     'insight' => $studentData['Insight']
                 ]);
             }
@@ -608,11 +614,13 @@ class KlasterisasiController extends Controller
         $upload = UploadLog::with(['clusterResults', 'clusterResults.toeflScoreEntry'])->findOrFail($upload_id);
 
         // Hitung jumlah per cluster untuk chart
-        $clusterCounts = [
-            'cluster_1' => $upload->clusterResults->where('cluster', 1)->count(),
-            'cluster_2' => $upload->clusterResults->where('cluster', 2)->count(),
-            'cluster_3' => $upload->clusterResults->where('cluster', 3)->count()
-        ];
+        $clusterCounts = $upload->clusterResults
+            ->groupBy('cluster')
+            ->mapWithKeys(function ($items, $cluster) {
+                return ["cluster_$cluster" => count($items)];
+            })
+            ->toArray();
+
 
 
         // Handle cluster data

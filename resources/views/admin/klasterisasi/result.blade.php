@@ -218,31 +218,21 @@
                                                         Cluster {{ $result->cluster }}
                                                     </span>
                                                 </td>
-                                                <td class="align-middle">
-                                                    <div class="progress-thin mb-1" style="height: 10px;">
+                                                <td>
+                                                    <ul class="mb-0 ps-3">
                                                         @foreach (collect($result->membership)->sortKeys() as $key => $value)
                                                             @php
-                                                                // Atur warna berdasarkan urutan cluster
-                                                                $colors = [
-                                                                    'bg-danger',
-                                                                    'bg-warning',
-                                                                    'bg-success',
-                                                                    'bg-primary',
-                                                                    'bg-info',
-                                                                    'bg-dark',
-                                                                ];
-                                                                $color = $colors[$loop->index % count($colors)];
+                                                                $label = Str::startsWith($key, 'Membership_Cluster_')
+                                                                    ? 'Cluster ' .
+                                                                        Str::after($key, 'Membership_Cluster_')
+                                                                    : $key;
                                                             @endphp
-                                                            <div class="progress-bar {{ $color }}"
-                                                                style="width: {{ $value * 100 }}%"></div>
+                                                            <li>{{ $label }}: {{ round((float) $value * 100, 1) }}%
+                                                            </li>
                                                         @endforeach
-                                                    </div>
-                                                    <div class="d-flex justify-content-between small text-muted">
-                                                        @foreach (collect($result->membership)->sortKeys() as $key => $value)
-                                                            <span>{{ round($value * 100, 1) }}%</span>
-                                                        @endforeach
-                                                    </div>
+                                                    </ul>
                                                 </td>
+
 
                                                 <td class="align-middle">
                                                     <button class="btn btn-sm btn-outline-secondary insight-btn"
@@ -307,13 +297,21 @@
                     const total = Object.values(clusterData).reduce((sum, count) => sum + count, 0);
 
                     // Prepare chart data
-                    const labels = Object.keys(clusterData).map(key => `Cluster ${key.split('_')[1]}`);
+                    // const clusterData = @json($cluster_counts);
+
+                    const labels = Object.keys(clusterData).map(key => {
+                        const num = key.replace('cluster_', '');
+                        return `Cluster ${num}`;
+                    });
+
                     const data = Object.values(clusterData);
-                    const backgroundColors = [
-                        'rgba(220, 53, 69, 0.7)', // Cluster 1 - danger
-                        'rgba(255, 193, 7, 0.7)', // Cluster 2 - warning
-                        'rgba(25, 135, 84, 0.7)' // Cluster 3 - success
-                    ];
+
+                    // Buat warna otomatis (pakai array warna atau hue)
+                    const backgroundColors = labels.map((_, index) => {
+                        const hue = (index * 60) % 360; // Hue dinamis
+                        return `hsl(${hue}, 70%, 60%)`;
+                    });
+
 
                     // Chart configuration
                     const config = {
