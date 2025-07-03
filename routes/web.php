@@ -67,6 +67,33 @@ Route::get('/klasterisasi', function () {
     }
 })->middleware('auth')->name('klasterisasi.index');
 
+Route::get('/export-excel/{upload_id}', function ($upload_id) {
+    $user = Auth::user();
+
+    if (!$user) abort(403, 'Unauthorized');
+
+    // Izinkan hanya 3 role tertentu
+    if (!in_array($user->role, ['admin', 'kepala_upa', 'wakil_direktur'])) {
+        abort(403, 'Access denied');
+    }
+
+    return app(ExportController::class)->exportExcel($upload_id);
+})->middleware('auth')->name('export.excel');
+
+
+Route::get('/export-pdf/{upload_id}', function ($upload_id) {
+    $user = Auth::user();
+
+    if (!$user) abort(403, 'Unauthorized');
+
+    // Izinkan hanya 3 role tertentu
+    if (!in_array($user->role, ['admin', 'kepala_upa', 'wakil_direktur'])) {
+        abort(403, 'Access denied');
+    }
+
+    return app(ExportController::class)->exportPdf($upload_id);
+})->middleware('auth')->name('export.pdf');
+
 
 
 
@@ -85,8 +112,8 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     // Route::get('/klasterisasi/result/{upload_id}', [KlasterisasiController::class, 'result'])->name('klasterisasi.result');
 
     // Export Controller
-    Route::get('/export-excel/{upload_id}', [ExportController::class, 'exportExcel'])->name('export.excel');
-    Route::get('/export-pdf/{upload_id}', [ExportController::class, 'exportPdf'])->name('export.pdf');
+    // Route::get('/export-excel/{upload_id}', [ExportController::class, 'exportExcel'])->name('export.excel');
+    // Route::get('/export-pdf/{upload_id}', [ExportController::class, 'exportPdf'])->name('export.pdf');
 
     // Tambah User
     Route::get('/users', [UserController::class, 'index'])->name('admin.users.index');
