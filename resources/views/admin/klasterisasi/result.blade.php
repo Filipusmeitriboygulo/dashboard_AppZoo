@@ -13,8 +13,11 @@
                                     <i class="fas fa-chart-network me-2"></i> Hasil Klasterisasi TOEFL
                                 </h3>
                                 <div class="d-flex align-items-center mt-2">
-                                    <span class="badge bg-white text-primary me-2">
+                                    <span class="badge bg-white text-dark me-2">
                                         <i class="fas fa-hashtag me-1"></i> Upload ID: {{ $upload->id }}
+                                    </span>
+                                    <span class="badge bg-white text-dark me-2">
+                                        <i class="fas fa-hashtag me-1"></i> Nama File: {{ $upload->file_name }}
                                     </span>
                                     <span class="text-white-50">
                                         <i class="far fa-clock me-1"></i> {{ $upload->created_at->format('d/m/Y H:i') }}
@@ -22,7 +25,7 @@
                                 </div>
                             </div>
                             <div>
-                                <span class="badge bg-white text-primary py-2">
+                                <span class="badge bg-white text-dark py-2">
                                     <i class="fas fa-users me-1"></i> {{ $results->count() }} Mahasiswa
                                 </span>
                             </div>

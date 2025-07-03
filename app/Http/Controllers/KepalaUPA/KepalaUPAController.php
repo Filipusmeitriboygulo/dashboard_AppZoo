@@ -7,6 +7,7 @@ use App\Models\UploadLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+
 class KepalaUPAController extends Controller
 {
     public function index()
@@ -16,34 +17,30 @@ class KepalaUPAController extends Controller
     }
     public function result($upload_id)
     {
-        // Ambil upload yang sudah diklasterisasi saja
-        $upload = UploadLog::with(['clusterResults', 'clusterResults.toeflScoreEntry'])
-            ->where('id', $upload_id)
-            ->where('status_klasterisasi', 'sudah') // pastikan hanya yang "sudah"
-            ->firstOrFail();
+        $upload = UploadLog::with(['clusterResults', 'clusterResults.toeflScoreEntry'])->findOrFail($upload_id);
 
         // Hitung jumlah per cluster untuk chart
-        $clusterCounts = [
-            'cluster_1' => $upload->clusterResults->where('cluster', 1)->count(),
-            'cluster_2' => $upload->clusterResults->where('cluster', 2)->count(),
-            'cluster_3' => $upload->clusterResults->where('cluster', 3)->count()
-        ];
+        $clusterCounts = $upload->clusterResults
+            ->groupBy('cluster')
+            ->mapWithKeys(function ($items, $cluster) {
+                return ["cluster_$cluster" => count($items)];
+            })
+            ->toArray();
 
-        // Persiapan variabel default
+
+
+        // Handle cluster data
         $cluster_info = [];
-        $visualization = null;
-
+        $visualization = $cluster_info['visualization'] ?? null;
+        // dd($upload);
         if ($upload->cluster_data) {
             try {
-                // Decode cluster_data dari kolom database
                 $cluster_info = json_decode($upload->cluster_data, true, 512, JSON_THROW_ON_ERROR);
+                $file = UploadLog::findOrFail($upload_id);
+                $filePath = storage_path('app/public/uploads/toefl/' . $file->file_name);
 
-                // Ambil path file untuk dikirim ke API Python
-                $filePath = storage_path('app/public/uploads/toefl/' . $upload->file_name);
-
-                // Panggil ulang API visualisasi (jika dibutuhkan)
                 $response = Http::timeout(120)
-                    ->attach('file', file_get_contents($filePath), $upload->file_name)
+                    ->attach('file', file_get_contents($filePath), $file->file_name)
                     ->post('http://127.0.0.1:5000/cluster');
 
                 if (!$response->successful()) {
@@ -51,32 +48,40 @@ class KepalaUPAController extends Controller
                 }
 
                 $apiResult = $response->json();
-                $gambar = $apiResult["data"]["visualization"] ?? null;
+                // dd($apiResult);
+                $gambar = $apiResult["data"]["visualization"];
+                // dd($gambar);
 
-                // Cek dan atur ulang key-key cluster_info
-                $cluster_info['centroids'] = $cluster_info['centroids'] ?? [];
-                $cluster_info['recommendations'] = $cluster_info['recommendations'] ?? [];
 
-                // Validasi dan ubah visualisasi jadi data URI jika belum
-                if ($gambar && !str_starts_with($gambar, 'data:image')) {
-                    $gambar = 'data:image/png;base64,' . trim($gambar);
+                // Validasi struktur data
+                if (!isset($cluster_info['centroids'])) {
+                    $cluster_info['centroids'] = [];
                 }
-
-                if ($gambar && !base64_decode(explode(',', $gambar)[1] ?? '', true)) {
-                    $gambar = null; // Invalid base64 → tidak ditampilkan
+                if (!isset($cluster_info['recommendations'])) {
+                    $cluster_info['recommendations'] = [];
                 }
+                if ($visualization) {
+                    // Bersihkan whitespace
+                    $visualization = trim($visualization);
+
+                    // Pastikan format data URI benar
+                    if (!str_starts_with($visualization, 'data:image')) {
+                        // Hanya tambahkan prefix jika string tidak kosong
+                        $visualization = !empty($visualization) ? 'data:image/png;base64,' . $visualization : null;
+                    }
+
+                    // Validasi base64
+                    if ($visualization && !base64_decode(explode(',', $visualization)[1] ?? '', true)) {
+                        $visualization = null; // Invalid base64
+                    }
+                }
+                // dd($visualization);
             } catch (\JsonException $e) {
-                Log::error('Failed to decode cluster_data', [
+                Log::error('Failed to decode cluster data', [
                     'upload_id' => $upload_id,
                     'error' => $e->getMessage()
                 ]);
                 $cluster_info = [];
-            } catch (\Exception $e) {
-                Log::error('Failed API Request or base64 handling', [
-                    'upload_id' => $upload_id,
-                    'error' => $e->getMessage()
-                ]);
-                $gambar = null;
             }
         }
 
@@ -85,7 +90,7 @@ class KepalaUPAController extends Controller
             'cluster_info' => $cluster_info,
             'upload' => $upload,
             'visualization' => $gambar,
-            'cluster_counts' => $clusterCounts
+            'cluster_counts' => $clusterCounts // Kirim data counts ke view
         ]);
     }
 }

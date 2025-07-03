@@ -20,6 +20,7 @@ use App\Http\Controllers\UploadLogController;
 
 
 
+
 Route::get('/', [HomeController::class, 'index'])->name('index');
 
 Auth::routes();
@@ -27,6 +28,25 @@ Auth::routes();
 // Dashboard Route
 // Route::middleware(['auth'])->group(function () {
 // Admin routes
+
+// Route DiLuar Prefix
+Route::get('/klasterisasi/result/{upload_id}', function ($upload_id) {
+    $user = Auth::user();
+    if (!$user) {
+        abort(403, 'Unauthorized');
+    }
+
+    if ($user->role === 'admin') {
+        return app(KlasterisasiController::class)->result($upload_id);
+    } elseif ($user->role === 'kepala_upa') {
+        return app(KepalaUPAController::class)->result($upload_id);
+    }
+
+    abort(403, 'Access denied');
+})->middleware('auth')->name('klasterisasi.result');
+
+
+
 Route::prefix('admin')->middleware('role:admin')->group(function () {
     
     Route::get('/home', [DataUploadController::class, 'index'])->name('home');
@@ -39,7 +59,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::get('/klasterisasi', [KlasterisasiController::class, 'index'])->name('klasterisasi.index');
     Route::post('/klasterisasi/analyze', [KlasterisasiController::class, 'analyze'])->name('klasterisasi.analyze');
     Route::post('/klasterisasi/reanalyze/{id}', [KlasterisasiController::class, 'reanalyze'])->name('klasterisasi.reanalyze');
-    Route::get('/klasterisasi/result/{upload_id}', [KlasterisasiController::class, 'result'])->name('klasterisasi.result');
+    // Route::get('/klasterisasi/result/{upload_id}', [KlasterisasiController::class, 'result'])->name('klasterisasi.result');
 
     // Export Controller
     Route::get('/export-excel/{upload_id}', [ExportController::class, 'exportExcel'])->name('export.excel');
@@ -57,8 +77,10 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
 // Kepala UPA routes
 Route::prefix('kepala-upa')->middleware('role:kepala_upa')->group(function () {
     Route::get('/dashboard', [KepalaUPAController::class, 'index'])->name('kepala-upa.dashboard');
-    Route::get('/result/{upload_id}', [KepalaUPAController::class,])->name('kepala-upa.result');
+    // Route::get('/klasterisasi/result/{upload_id}', [KepalaUPAController::class, 'result'])->name('kepala-upa.result');
 });
+
+
 
 // Ketua Jurusan routes
 Route::prefix('ketua-jurusan')->middleware('role:ketua_jurusan')->group(function () {
