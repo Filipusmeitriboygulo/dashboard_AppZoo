@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Department;
+use App\Models\StudyProgram;
 use App\Models\ToeflScoreEntry;
 use App\Models\UploadLog;
 use Illuminate\Support\Facades\Validator;
@@ -345,6 +346,23 @@ class DataUploadController extends Controller
                 $jurusan = $jurusan ?? 'UMUM';
                 $prodi = $prodi ?? 'UMUM';
 
+                $department = Department::where(function ($query) use ($jurusan) {
+                    $query->where('code', strtoupper(trim($jurusan)))
+                        ->orWhere('name', 'LIKE', '%' . trim($jurusan) . '%');
+                })->first();
+
+                $studyProgram = StudyProgram::where(function ($query) use ($prodi) {
+                    $query->where('code', strtoupper(trim($prodi)))
+                        ->orWhere('name', 'LIKE', '%' . trim($prodi) . '%');
+                })->first();
+
+                if (!$department) {
+                    Log::warning("Jurusan tidak ditemukan: $jurusan (baris $i)");
+                }
+                if (!$studyProgram) {
+                    Log::warning("Prodi tidak ditemukan: $prodi (baris $i)");
+                }
+
                 // Simpan data (tidak ada validasi yang melewatkan baris)
                 ToeflScoreEntry::create([
                     'upload_id' => $uploadId,
@@ -357,6 +375,8 @@ class DataUploadController extends Controller
                     'structure' => is_numeric($row[8] ?? null) ? (int)$row[8] : null,
                     'reading' => is_numeric($row[9] ?? null) ? (int)$row[9] : null,
                     'total_score' => is_numeric($row[10] ?? null) ? (int)$row[10] : null,
+                    'department_id' => optional($department)->id,
+                    'study_program_id' => optional($studyProgram)->id,
                 ]);
             } catch (\Exception $e) {
                 Log::error("Gagal memproses baris $i: " . $e->getMessage());

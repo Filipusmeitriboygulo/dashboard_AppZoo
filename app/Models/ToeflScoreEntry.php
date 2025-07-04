@@ -17,6 +17,8 @@ class ToeflScoreEntry extends Model
         'kelas',
         'prodi',
         'jurusan',
+        'department_id',
+        'study_program_id',
         'listening',
         'structure',
         'reading',

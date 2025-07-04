@@ -15,18 +15,16 @@
                         <!-- Nama -->
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="text" name="name" id="name" class="form-control"
-                                    placeholder="Nama Lengkap" required>
-                                <label for="name" class="form-label">Nama Lengkap</label>
+                                <input type="text" name="name" id="name" class="form-control" placeholder="Nama Lengkap" required>
+                                <label for="name">Nama Lengkap</label>
                             </div>
                         </div>
 
                         <!-- Email -->
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="email" name="email" id="email" class="form-control"
-                                    placeholder="Alamat Email" required>
-                                <label for="email" class="form-label">Alamat Email</label>
+                                <input type="email" name="email" id="email" class="form-control" placeholder="Alamat Email" required>
+                                <label for="email">Alamat Email</label>
                             </div>
                         </div>
 
@@ -41,7 +39,7 @@
                                     <option value="ketua_prodi">Ketua Prodi</option>
                                     <option value="wakil_direktur">Wakil Direktur</option>
                                 </select>
-                                <label for="role" class="form-label">Role Pengguna</label>
+                                <label for="role">Role Pengguna</label>
                             </div>
                         </div>
 
@@ -52,12 +50,12 @@
                                     <option value="1">Aktif</option>
                                     <option value="0">Nonaktif</option>
                                 </select>
-                                <label for="is_active" class="form-label">Status Akun</label>
+                                <label for="is_active">Status Akun</label>
                             </div>
                         </div>
 
-                        <!-- Jurusan (Conditional) -->
-                        <div class="col-md-6 role-dependent" style="display: none;">
+                        <!-- Jurusan -->
+                        <div class="col-md-6" id="department-group" style="display: none;">
                             <div class="form-floating">
                                 <select name="department_id" id="department_id" class="form-select">
                                     <option value="">Pilih Jurusan</option>
@@ -65,12 +63,12 @@
                                         <option value="{{ $d->id }}">{{ $d->name }}</option>
                                     @endforeach
                                 </select>
-                                <label for="department_id" class="form-label">Jurusan</label>
+                                <label for="department_id">Jurusan</label>
                             </div>
                         </div>
 
-                        <!-- Prodi (Conditional) -->
-                        <div class="col-md-6 role-dependent" style="display: none;">
+                        <!-- Prodi -->
+                        <div class="col-md-6" id="study-program-group" style="display: none;">
                             <div class="form-floating">
                                 <select name="study_program_id" id="study_program_id" class="form-select">
                                     <option value="">Pilih Program Studi</option>
@@ -78,22 +76,21 @@
                                         <option value="{{ $p->id }}">{{ $p->name }}</option>
                                     @endforeach
                                 </select>
-                                <label for="study_program_id" class="form-label">Program Studi</label>
+                                <label for="study_program_id">Program Studi</label>
                             </div>
                         </div>
 
                         <!-- Password -->
                         <div class="col-12">
-                            <div class="form-floating">
-                                <input type="password" name="password" id="password" class="form-control"
-                                    placeholder="Password">
-                                <label for="password" class="form-label">Password</label>
-                                <small class="text-muted">Biarkan kosong untuk menggunakan password default:
-                                    'password'</small>
+                            <div class="form-floating position-relative">
+                                <input type="password" name="password" id="password" class="form-control" placeholder="Password">
+                                <label for="password">Password</label>
+                                <small class="text-muted">Biarkan kosong untuk menggunakan password default: 'password'</small>
                             </div>
                         </div>
                     </div>
                 </div>
+
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <i class="fas fa-times me-1"></i> Batal
@@ -107,34 +104,44 @@
     </div>
 </div>
 
-<!-- Script untuk menampilkan jurusan dan prodi sesuai role -->
+{{-- Script --}}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const roleSelect = document.getElementById('role');
-        const dependentFields = document.querySelectorAll('.role-dependent');
+        const departmentGroup = document.getElementById('department-group');
+        const studyProgramGroup = document.getElementById('study-program-group');
+        const departmentSelect = document.getElementById('department_id');
+        const studyProgramSelect = document.getElementById('study_program_id');
 
-        roleSelect?.addEventListener('change', function() {
-            const role = this.value;
-            const showFields = ['ketua_jurusan', 'ketua_prodi'];
+        function updateFieldVisibility() {
+            const role = roleSelect.value;
 
-            dependentFields.forEach(el => {
-                el.style.display = showFields.includes(role) ? 'block' : 'none';
+            departmentGroup.style.display = 'none';
+            studyProgramGroup.style.display = 'none';
+            departmentSelect.required = false;
+            studyProgramSelect.required = false;
 
-                // Add required attribute when visible
-                const select = el.querySelector('select');
-                if (select) {
-                    select.required = showFields.includes(role);
-                }
-            });
-        });
+            if (role === 'ketua_jurusan') {
+                departmentGroup.style.display = 'block';
+                departmentSelect.required = true;
+            } else if (role === 'ketua_prodi') {
+                departmentGroup.style.display = 'block';
+                studyProgramGroup.style.display = 'block';
+                departmentSelect.required = true;
+                studyProgramSelect.required = true;
+            }
+        }
 
-        // Initialize password field with a random password generator option
+        roleSelect.addEventListener('change', updateFieldVisibility);
+        updateFieldVisibility(); // On page load
+
+        // Password Generator
         const passwordField = document.getElementById('password');
         const generatePasswordBtn = document.createElement('button');
         generatePasswordBtn.type = 'button';
         generatePasswordBtn.className = 'btn btn-sm btn-outline-secondary mt-2';
         generatePasswordBtn.innerHTML = '<i class="fas fa-random me-1"></i> Generate Password';
-        generatePasswordBtn.onclick = function() {
+        generatePasswordBtn.onclick = function () {
             const randomString = Math.random().toString(36).slice(-8);
             passwordField.value = randomString;
         };

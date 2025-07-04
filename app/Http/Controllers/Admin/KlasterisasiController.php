@@ -20,11 +20,41 @@ class KlasterisasiController extends Controller
         $this->middleware('auth');
     }
 
+    // public function index()
+    // {
+    //     $file_uploads = UploadLog::orderBy('created_at', 'desc')->get();
+    //     return view('admin.klasterisasi.index', compact('file_uploads'));
+    // }
+
+    // Lokasi: app/Http/Controllers/KlasterisasiController.php
+
     public function index()
     {
-        $file_uploads = UploadLog::orderBy('created_at', 'desc')->get();
+        $user = Auth::user();
+
+        if (in_array($user->role, ['admin', 'kepala_upa', 'wakil_direktur'])) {
+            $file_uploads = UploadLog::with('toeflScores')->get();
+        } elseif ($user->role === 'ketua_jurusan') {
+            // Ambil semua prodi ID di bawah jurusan tersebut
+            $prodiIds = $user->department->studyPrograms->pluck('id')->toArray();
+            $departmentId = $user->department->id;
+
+            // Ambil UploadLog yang memiliki skor dengan department_id sesuai, atau prodi di bawah jurusan tersebut
+            $file_uploads = UploadLog::whereHas('toeflScores', function ($query) use ($departmentId, $prodiIds) {
+                $query->where('department_id', $departmentId)
+                    ->orWhereIn('study_program_id', $prodiIds);
+            })->with(['toeflScores' => function ($query) use ($departmentId, $prodiIds) {
+                $query->where('department_id', $departmentId)
+                    ->orWhereIn('study_program_id', $prodiIds);
+            }])->get();
+        } else {
+            abort(403, 'Unauthorized');
+        }
+
         return view('admin.klasterisasi.index', compact('file_uploads'));
     }
+
+
 
 
 

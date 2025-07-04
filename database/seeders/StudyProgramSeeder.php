@@ -38,11 +38,16 @@ class StudyProgramSeeder extends Seeder
           
 
             //  Bisnis
-            ['department_id' => $bs->id, 'name' => 'Administrasi Bisnis', 'code' => 'ADB'],
-    
+            ['department_id' => $bs->id, 'name' => 'Adm.Bisnis', 'code' => 'ADB'],
+            ['department_id' => $bs->id, 'name' => 'Akuntasi Lembaga Keuangan Syariah', 'code' => 'ALKS'],
+            ['department_id' => $bs->id, 'name' => 'Akuntasi Sektor Publik', 'code' => 'ASP'],
+            ['department_id' => $bs->id, 'name' => 'Akuntasi', 'code' => 'AK'],
+            ['department_id' => $bs->id, 'name' => 'Manajemen Keuangan Sektor Publik', 'code' => 'MKSP'],
 
             // TIK
             ['department_id' => $tik->id, 'name' => 'Teknik Informatika', 'code' => 'TI'],
+            ['department_id' => $tik->id, 'name' => 'Teknologi Rekayasa Komputer dan Jaringan ', 'code' => 'TRKJ'],
+            ['department_id' => $tik->id, 'name' => 'Teknologi Rekayasa Multimedia', 'code' => 'TRM'],
         ];
 
         foreach ($studyPrograms as $program) {

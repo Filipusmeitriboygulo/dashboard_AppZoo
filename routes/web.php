@@ -42,11 +42,13 @@ Route::get('/klasterisasi/result/{upload_id}', function ($upload_id) {
         return app(KepalaUPAController::class)->result($upload_id);
     } elseif ($user->role === 'wakil_direktur') {
         return app(WakilDirekturController::class)->result($upload_id);
+    } elseif ($user->role === 'ketua_jurusan') {
+        return app(KetuaJurusanController::class)->result($upload_id);
     }
-
 
     abort(403, 'Access denied');
 })->middleware('auth')->name('klasterisasi.result');
+
 
 Route::get('/klasterisasi', function () {
     $user = Auth::user();
@@ -62,6 +64,8 @@ Route::get('/klasterisasi', function () {
             return app(KepalaUPAController::class)->index();
         case 'wakil_direktur':
             return app(WakilDirekturController::class)->index();
+        case 'ketua_jurusan':
+            return app(KetuaJurusanController::class)->index();
         default:
             abort(403, 'Access denied');
     }
@@ -73,7 +77,7 @@ Route::get('/export-excel/{upload_id}', function ($upload_id) {
     if (!$user) abort(403, 'Unauthorized');
 
     // Izinkan hanya 3 role tertentu
-    if (!in_array($user->role, ['admin', 'kepala_upa', 'wakil_direktur'])) {
+    if (!in_array($user->role, ['admin', 'kepala_upa', 'wakil_direktur', 'ketua_jurusan'])) {
         abort(403, 'Access denied');
     }
 
@@ -87,7 +91,7 @@ Route::get('/export-pdf/{upload_id}', function ($upload_id) {
     if (!$user) abort(403, 'Unauthorized');
 
     // Izinkan hanya 3 role tertentu
-    if (!in_array($user->role, ['admin', 'kepala_upa', 'wakil_direktur'])) {
+    if (!in_array($user->role, ['admin', 'kepala_upa', 'wakil_direktur', 'ketua_jurusan'])) {
         abort(403, 'Access denied');
     }
 
@@ -137,12 +141,12 @@ Route::prefix('wakil-direktur')->middleware('role:wakil_direktur')->group(functi
 
 // Ketua Jurusan routes
 Route::prefix('ketua-jurusan')->middleware('role:ketua_jurusan')->group(function () {
-    Route::get('/dashboard', [KetuaJurusanController::class, 'dashboard'])->name('ketua-jurusan.dashboard');
+    Route::get('/dashboard', [KetuaJurusanController::class, 'index'])->name('ketua-jurusan.dashboard');
 });
 
 // Ketua Prodi routes
 Route::prefix('ketua-prodi')->middleware('role:ketua_prodi')->group(function () {
-    Route::get('/dashboard', [KetuaProdiController::class, 'dashboard'])->name('ketua-prodi.dashboard');
+    Route::get('/dashboard', [KetuaProdiController::class, 'index'])->name('ketua-prodi.dashboard');
 });
 
 // Wakil Direktur routes
