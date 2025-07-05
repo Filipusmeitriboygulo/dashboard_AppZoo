@@ -1,5 +1,11 @@
 @extends('layouts.auth')
 
+@php
+    function cluster_color($cluster) {
+        $hue = (($cluster - 1) * 60) % 360;
+        return "hsl($hue, 70%, 60%)";
+    }
+@endphp
 @section('content')
     <div class="container-fluid px-4">
         <div class="row">
@@ -126,10 +132,16 @@
                             <div class="card-body p-4">
                                 <div class="row g-4">
                                     @foreach ($cluster_info['recommendations'] as $cluster => $rec)
+                                        @php
+                                            $clusterIndex = $cluster - 1;
+                                            $hue = ($clusterIndex * 60) % 360;
+                                            $color = "hsl($hue, 70%, 60%)";
+                                        @endphp
+
                                         <div class="col-md-4">
                                             <div class="card h-100 border-0 shadow-sm">
-                                                <div
-                                                    class="card-header bg-{{ $cluster == 1 ? 'danger' : ($cluster == 2 ? 'warning' : 'success') }} text-white">
+                                                <div class="card-header text-white"
+                                                    style="background-color: {{ $color }};">
                                                     <h5 class="mb-0">
                                                         <i
                                                             class="fas fa-{{ $cluster == 1 ? 'exclamation-triangle' : ($cluster == 2 ? 'hourglass-half' : 'check-circle') }} me-2"></i>
@@ -140,9 +152,8 @@
                                                     <ul class="list-unstyled mb-0">
                                                         @foreach ($rec as $item)
                                                             <li class="mb-2 d-flex align-items-start">
-                                                                <span
-                                                                    class="badge bg-{{ $cluster == 1 ? 'danger' : ($cluster == 2 ? 'warning' : 'success') }} me-2 mt-1"
-                                                                    style="min-width: 20px;">
+                                                                <span class="badge me-2 mt-1"
+                                                                    style="background-color: {{ $color }}; color: #fff;">
                                                                     <i class="fas fa-arrow-right"
                                                                         style="font-size: 0.7rem;"></i>
                                                                 </span>
@@ -216,10 +227,17 @@
                                                     <strong>{{ $result->toeflScoreEntry->total_score ?? '-' }}</strong>
                                                 </td>
                                                 <td class="align-middle">
-                                                    <span
-                                                        class="badge bg-{{ $result->cluster == 1 ? 'danger' : ($result->cluster == 2 ? 'warning' : 'success') }} py-2">
+                                                    @php
+                                                        $clusterIndex = $result->cluster - 1; // karena index dimulai dari 0
+                                                        $hue = ($clusterIndex * 60) % 360;
+                                                        $color = "hsl($hue, 70%, 60%)";
+                                                    @endphp
+
+                                                    <span class="badge py-2"
+                                                        style="background-color: {{ $color }}; color: #fff;">
                                                         Cluster {{ $result->cluster }}
                                                     </span>
+
                                                 </td>
                                                 <td>
                                                     <ul class="mb-0 ps-3">

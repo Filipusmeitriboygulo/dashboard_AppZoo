@@ -13,10 +13,10 @@ class DepartmentSeeder extends Seeder
         Department::query()->delete();
 
         $departments = [
-            ['name' => 'Teknik Elektro', 'code' => 'TE'],
-            ['name' => 'Teknik Mesin', 'code' => 'TM'],
-            ['name' => 'Teknik Sipil', 'code' => 'TS'],
-            ['name' => 'Teknik Kimia', 'code' => 'TK'],
+            ['name' => 'Teknik Elektro', 'code' => 'T.Elektro'],
+            ['name' => 'Teknik Mesin', 'code' => 'T.Mesin'],
+            ['name' => 'Teknik Sipil', 'code' => 'T.Sipil'],
+            ['name' => 'Teknik Kimia', 'code' => 'T.Kimia'],
             ['name' => 'Bisnis', 'code' => 'BS'],
             ['name' => 'Teknologi Informasi dan Komputer', 'code' => 'TIK'],
         ];
