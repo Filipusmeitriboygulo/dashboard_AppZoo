@@ -9,8 +9,9 @@
             'kepala_upa' => 'kepala-upa',
             'wakil_direktur' => 'wakil-direktur',
             'ketua_jurusan' =>'ketua_jurusan',
-            
-            default => null,
+            'ketua_prodi' =>'ketua_prodi',
+
+            default => null
         };
 
     @endphp

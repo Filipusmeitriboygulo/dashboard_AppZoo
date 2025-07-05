@@ -1,11 +1,14 @@
 @extends('layouts.auth')
 
+
 @php
-    function cluster_color($cluster) {
+    function cluster_color($cluster)
+    {
         $hue = (($cluster - 1) * 60) % 360;
         return "hsl($hue, 70%, 60%)";
     }
 @endphp
+
 @section('content')
     <div class="container-fluid px-4">
         <div class="row">
@@ -300,41 +303,32 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Chart
             const initClusterChart = () => {
                 const ctx = document.getElementById('clusterBarChart');
                 const chartError = document.getElementById('chartError');
                 const chartLoading = document.getElementById('chartLoading');
 
                 try {
-                    // Data from controller
                     const clusterData = @json($cluster_counts);
-
                     if (!clusterData || Object.keys(clusterData).length === 0) {
                         throw new Error('Data klaster tidak tersedia');
                     }
 
-                    // Calculate total for percentages
-                    const total = Object.values(clusterData).reduce((sum, count) => sum + count, 0);
-
-                    // Prepare chart data
-                    // const clusterData = @json($cluster_counts);
-
-                    const labels = Object.keys(clusterData).map(key => {
-                        const num = key.replace('cluster_', '');
-                        return `Cluster ${num}`;
+                    const sortedKeys = Object.keys(clusterData).sort((a, b) => {
+                        const numA = parseInt(a.replace('cluster_', ''));
+                        const numB = parseInt(b.replace('cluster_', ''));
+                        return numA - numB;
                     });
 
-                    const data = Object.values(clusterData);
-
-                    // Buat warna otomatis (pakai array warna atau hue)
-                    const backgroundColors = labels.map((_, index) => {
-                        const hue = (index * 60) % 360; // Hue dinamis
+                    const total = sortedKeys.reduce((sum, key) => sum + clusterData[key], 0);
+                    const labels = sortedKeys.map(key => `Cluster ${key.replace('cluster_', '')}`);
+                    const data = sortedKeys.map(key => clusterData[key]);
+                    const backgroundColors = sortedKeys.map(key => {
+                        const index = parseInt(key.replace('cluster_', '')) - 1;
+                        const hue = (index * 60) % 360;
                         return `hsl(${hue}, 70%, 60%)`;
                     });
 
-
-                    // Chart configuration
                     const config = {
                         type: 'bar',
                         data: {
@@ -343,8 +337,7 @@
                                 label: 'Jumlah Mahasiswa',
                                 data: data,
                                 backgroundColor: backgroundColors,
-                                borderColor: backgroundColors.map(color => color.replace('0.7',
-                                    '1')),
+                                borderColor: backgroundColors,
                                 borderWidth: 1,
                                 borderRadius: 4,
                                 barPercentage: 0.7
@@ -386,10 +379,8 @@
                         }
                     };
 
-                    // Hide loading and render chart
                     chartLoading.classList.add('d-none');
                     new Chart(ctx, config);
-
                 } catch (error) {
                     console.error('Error creating chart:', error);
                     chartLoading.classList.add('d-none');

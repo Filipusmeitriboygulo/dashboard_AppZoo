@@ -44,6 +44,8 @@ Route::get('/klasterisasi/result/{upload_id}', function ($upload_id) {
         return app(WakilDirekturController::class)->result($upload_id);
     } elseif ($user->role === 'ketua_jurusan') {
         return app(KetuaJurusanController::class)->result($upload_id);
+    } elseif ($user->role === 'ketua_prodi') {
+        return app(KetuaProdiController::class)->result($upload_id);
     }
 
     abort(403, 'Access denied');
@@ -66,6 +68,8 @@ Route::get('/klasterisasi', function () {
             return app(WakilDirekturController::class)->index();
         case 'ketua_jurusan':
             return app(KetuaJurusanController::class)->index();
+        case 'ketua_prodi':
+            return app(KetuaProdiController::class)->index();
         default:
             abort(403, 'Access denied');
     }
@@ -77,7 +81,7 @@ Route::get('/export-excel/{upload_id}', function ($upload_id) {
     if (!$user) abort(403, 'Unauthorized');
 
     // Izinkan hanya 3 role tertentu
-    if (!in_array($user->role, ['admin', 'kepala_upa', 'wakil_direktur', 'ketua_jurusan'])) {
+    if (!in_array($user->role, ['admin', 'kepala_upa', 'wakil_direktur', 'ketua_jurusan', 'ketua_prodi'])) {
         abort(403, 'Access denied');
     }
 
@@ -91,7 +95,7 @@ Route::get('/export-pdf/{upload_id}', function ($upload_id) {
     if (!$user) abort(403, 'Unauthorized');
 
     // Izinkan hanya 3 role tertentu
-    if (!in_array($user->role, ['admin', 'kepala_upa', 'wakil_direktur', 'ketua_jurusan'])) {
+    if (!in_array($user->role, ['admin', 'kepala_upa', 'wakil_direktur', 'ketua_jurusan', 'ketua_prodi'])) {
         abort(403, 'Access denied');
     }
 

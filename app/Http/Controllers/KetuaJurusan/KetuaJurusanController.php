@@ -21,19 +21,32 @@ class KetuaJurusanController extends Controller
     {
         $user = Auth::user();
 
-        $prodiIds = $user->department->studyPrograms->pluck('id');
-        $departmentId = $user->department->id;
+        // Ambil semua id prodi yang berada di bawah jurusan dia
+        $prodiIds = $user->department->studyPrograms->pluck('id')->toArray();
 
-        $file_uploads = UploadLog::whereHas('toeflScores', function ($query) use ($departmentId, $prodiIds) {
-            $query->where('department_id', $departmentId)
-                ->orWhereIn('study_program_id', $prodiIds);
-        })->with(['toeflScores' => function ($query) use ($departmentId, $prodiIds) {
-            $query->where('department_id', $departmentId)
-                ->orWhereIn('study_program_id', $prodiIds);
-        }])->get();
+        // Ambil nama jurusan (untuk cocok dengan kolom unit_nama jika cakupan = jurusan)
+        $namaJurusan = $user->department->name;
+
+        $file_uploads = UploadLog::where(function ($query) use ($prodiIds, $namaJurusan) {
+            $query->where(function ($q) use ($prodiIds) {
+                // Jika cakupan adalah 'prodi' dan prodi-nya milik jurusan dia
+                $q->where('cakupan', 'prodi')
+                    ->whereHas('toeflScores', function ($subQuery) use ($prodiIds) {
+                        $subQuery->whereIn('study_program_id', $prodiIds);
+                    });
+            })->orWhere(function ($q) use ($namaJurusan) {
+                // Jika cakupan adalah 'jurusan' dan sesuai dengan jurusan dia
+                $q->where('cakupan', 'jurusan')
+                    ->where('unit_nama', $namaJurusan);
+            });
+        })
+            ->with(['toeflScores' => function ($query) use ($prodiIds) {
+                $query->whereIn('study_program_id', $prodiIds);
+            }])->get();
 
         return view('admin.klasterisasi.index', compact('file_uploads'));
     }
+
 
     public function result($upload_id)
     {
