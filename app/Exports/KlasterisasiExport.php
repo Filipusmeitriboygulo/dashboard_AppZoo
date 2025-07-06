@@ -2,52 +2,126 @@
 
 namespace App\Exports;
 
+use App\Models\UploadLog;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use App\Models\UploadLog;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class KlasterisasiExport implements FromCollection, WithHeadings
+class KlasterisasiExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths, WithTitle
 {
+    protected $upload_id;
     protected $upload;
 
-    public function __construct(UploadLog $upload)
+    public function __construct($upload_id)
     {
-        $this->upload = $upload;
+        $this->upload_id = $upload_id;
+        $this->upload = UploadLog::findOrFail($upload_id);
     }
 
     public function collection()
     {
-        return $this->upload->clusterResults->map(function ($result) {
-            return [
-                'Nama' => $result->toeflScoreEntry->nama ?? '-',
-                'NIM' => $result->toeflScoreEntry->nim ?? '-',
-                'Listening' => $result->toeflScoreEntry->listening ?? '-',
-                'Structure' => $result->toeflScoreEntry->structure ?? '-',
-                'Reading' => $result->toeflScoreEntry->reading ?? '-',
-                'Total Score' => $result->toeflScoreEntry->total_score ?? '-',
-                'Cluster' => $result->cluster,
-                'Membership Cluster 1' => round($result->membership_cluster1 * 100, 2) . '%',
-                'Membership Cluster 2' => round($result->membership_cluster2 * 100, 2) . '%',
-                'Membership Cluster 3' => round($result->membership_cluster3 * 100, 2) . '%',
-                'Insight' => $result->insight,
-            ];
-        });
+        return $this->upload->clusterResults()->with('toeflScoreEntry')->get();
     }
 
     public function headings(): array
     {
         return [
-            'Nama',
+            'No',
+            'Nama Mahasiswa',
             'NIM',
-            'Listening',
-            'Structure',
-            'Reading',
+            'Listening Score',
+            'Structure Score',
+            'Reading Score',
             'Total Score',
             'Cluster',
-            'Membership Cluster 1',
-            'Membership Cluster 2',
-            'Membership Cluster 3',
-            'Insight',
+            'Insight & Rekomendasi'
         ];
+    }
+
+    public function map($result): array
+    {
+        static $no = 0;
+        $no++;
+
+        return [
+            $no,
+            $result->toeflScoreEntry->nama ?? '-',
+            $result->toeflScoreEntry->nim ?? '-',
+            $result->toeflScoreEntry->listening ?? '-',
+            $result->toeflScoreEntry->structure ?? '-',
+            $result->toeflScoreEntry->reading ?? '-',
+            $result->toeflScoreEntry->total_score ?? '-',
+            'Cluster ' . $result->cluster,
+            $result->insight ?? 'Tidak ada insight tersedia'
+        ];
+    }
+
+    public function styles(Worksheet $sheet)
+    {
+        return [
+            // Header row styling
+            1 => [
+                'font' => [
+                    'bold' => true,
+                    'color' => ['rgb' => 'FFFFFF']
+                ],
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => '4472C4']
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER
+                ]
+            ],
+            // All cells border
+            'A1:I' . ($this->collection()->count() + 1) => [
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                        'color' => ['rgb' => '000000']
+                    ]
+                ]
+            ],
+            // Center align for specific columns
+            'A:A' => ['alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]], // No
+            'C:C' => ['alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]], // NIM
+            'D:G' => ['alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]], // Scores
+            'H:H' => ['alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]], // Cluster
+            // Wrap text for insight column
+            'I:I' => [
+                'alignment' => [
+                    'wrapText' => true,
+                    'vertical' => Alignment::VERTICAL_TOP
+                ]
+            ]
+        ];
+    }
+
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 5,   // No
+            'B' => 25,  // Nama
+            'C' => 15,  // NIM
+            'D' => 12,  // Listening
+            'E' => 12,  // Structure
+            'F' => 12,  // Reading
+            'G' => 12,  // Total
+            'H' => 12,  // Cluster
+            'I' => 50,  // Insight (lebih lebar)
+        ];
+    }
+
+    public function title(): string
+    {
+        return 'Klasterisasi_' . $this->upload->id;
     }
 }

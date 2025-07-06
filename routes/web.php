@@ -80,7 +80,7 @@ Route::get('/export-excel/{upload_id}', function ($upload_id) {
 
     if (!$user) abort(403, 'Unauthorized');
 
-    // Izinkan hanya 3 role tertentu
+    // Izinkan hanya role tertentu
     if (!in_array($user->role, ['admin', 'kepala_upa', 'wakil_direktur', 'ketua_jurusan', 'ketua_prodi'])) {
         abort(403, 'Access denied');
     }
@@ -94,7 +94,7 @@ Route::get('/export-pdf/{upload_id}', function ($upload_id) {
 
     if (!$user) abort(403, 'Unauthorized');
 
-    // Izinkan hanya 3 role tertentu
+    // Izinkan hanya  role tertentu
     if (!in_array($user->role, ['admin', 'kepala_upa', 'wakil_direktur', 'ketua_jurusan', 'ketua_prodi'])) {
         abort(403, 'Access denied');
     }

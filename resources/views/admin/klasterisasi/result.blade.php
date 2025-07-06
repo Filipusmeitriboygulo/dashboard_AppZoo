@@ -73,9 +73,10 @@
                                     @if ($visualization)
                                         <div class="text-center" id="visualization-container">
                                             <img src="{{ $visualization }}"
-                                                class="img-fluid rounded shadow visualization-img thumbnail"
+                                                class="img-fluid rounded shadow visualization-img thumbnail lightbox-trigger"
                                                 style="max-height: 400px; width: auto; cursor: pointer;"
-                                                alt="Visualisasi Hasil Klasterisasi TOEFL" onclick="openLightbox(this)">
+                                                alt="Visualisasi Hasil Klasterisasi TOEFL">
+
                                             <div class="mt-3">
                                                 <small class="text-muted">Distribusi mahasiswa berdasarkan klaster skor
                                                     TOEFL</small>
@@ -86,13 +87,6 @@
                                             <i class="fas fa-info-circle me-2"></i> Data visualisasi belum tersedia
                                         </div>
                                     @endif
-                                </div>
-                            </div>
-                            <div id="lightbox" class="lightbox">
-                                <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
-                                <div class="lightbox-content">
-                                    <img id="lightbox-image" class="lightbox-image" src="">
-                                    <div class="lightbox-caption" id="lightbox-caption"></div>
                                 </div>
                             </div>
                         </div>
@@ -181,7 +175,7 @@
                                 <i class="fas fa-table me-2"></i> Detail Hasil Klasterisasi
                             </h4>
                             <div>
-                                <button class="btn btn-sm btn-outline-primary me-2" id="exportExcel">
+                                <button class="btn btn-sm btn-outline-success me-2" id="exportExcel">
                                     <i class="fas fa-file-excel me-1"></i> Excel
                                 </button>
                                 <button class="btn btn-sm btn-outline-danger" id="exportPDF">
@@ -297,12 +291,22 @@
             </div>
         </div>
     </div>
+
+    {{-- Lightbox  --}}
+    <div id="lightbox" class="lightbox">
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+        <div class="lightbox-content">
+            <img id="lightbox-image" class="lightbox-image" src="">
+            <div class="lightbox-caption" id="lightbox-caption"></div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // 1. Chart Cluster
             const initClusterChart = () => {
                 const ctx = document.getElementById('clusterBarChart');
                 const chartError = document.getElementById('chartError');
@@ -315,9 +319,8 @@
                     }
 
                     const sortedKeys = Object.keys(clusterData).sort((a, b) => {
-                        const numA = parseInt(a.replace('cluster_', ''));
-                        const numB = parseInt(b.replace('cluster_', ''));
-                        return numA - numB;
+                        return parseInt(a.replace('cluster_', '')) - parseInt(b.replace('cluster_',
+                            ''));
                     });
 
                     const total = sortedKeys.reduce((sum, key) => sum + clusterData[key], 0);
@@ -382,23 +385,20 @@
                     chartLoading.classList.add('d-none');
                     new Chart(ctx, config);
                 } catch (error) {
-                    console.error('Error creating chart:', error);
                     chartLoading.classList.add('d-none');
                     chartError.classList.remove('d-none');
                     chartError.textContent = 'Gagal memuat data distribusi klaster: ' + error.message;
                 }
             };
 
-            // Initialize tooltips
+            // 2. Tooltip Bootstrap
             const initTooltips = () => {
                 const tooltipTriggerList = [].slice.call(document.querySelectorAll(
                     '[data-bs-toggle="tooltip"]'));
-                tooltipTriggerList.map(function(tooltipTriggerEl) {
-                    return new bootstrap.Tooltip(tooltipTriggerEl);
-                });
+                tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
             };
 
-            // Initialize insight modal
+            // 3. Insight Modal
             const initInsightModal = () => {
                 const insightButtons = document.querySelectorAll('.insight-btn');
                 const insightModal = new bootstrap.Modal(document.getElementById('insightModal'));
@@ -413,73 +413,63 @@
                 });
             };
 
-            // Initialize all components
-            initClusterChart();
-            initTooltips();
-            initInsightModal();
-
-            // Fungsi Toggle Screen Visualisasi 
-            // Lightbox functionality
-            document.addEventListener('DOMContentLoaded', function() {
-                // Get the lightbox elements
-                const lightbox = document.getElementById('custom-lightbox');
-                const lightboxImg = document.getElementById('custom-lightbox-img');
-                const lightboxCaption = document.getElementById('custom-lightbox-caption');
-                const closeBtn = document.querySelector('.custom-lightbox-close');
-
-                // Get all trigger elements
+            // 4. Lightbox
+            // 4. Lightbox
+            const initLightbox = () => {
                 const triggers = document.querySelectorAll('.lightbox-trigger');
+                const lightbox = document.getElementById('lightbox');
+                const lightboxImage = document.getElementById('lightbox-image');
+                const lightboxCaption = document.getElementById('lightbox-caption');
 
-                // Add click event to all triggers
+                const openLightbox = (src, alt) => {
+                    lightbox.classList.add('active');
+                    lightboxImage.src = src;
+                    lightboxCaption.innerText = alt || 'Visualisasi Klaster';
+                    document.body.style.overflow = 'hidden';
+                };
+
+                const closeLightbox = () => {
+                    lightbox.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                };
+
                 triggers.forEach(trigger => {
                     trigger.addEventListener('click', function() {
-                        lightbox.style.display = 'block';
-                        lightboxImg.src = this.src;
-                        lightboxCaption.innerHTML = this.alt;
-                        document.body.style.overflow = 'hidden'; // Disable scrolling
+                        openLightbox(this.src, this.alt);
                     });
                 });
 
-                // Close lightbox
-                closeBtn.addEventListener('click', function() {
-                    lightbox.style.display = 'none';
-                    document.body.style.overflow = 'auto'; // Enable scrolling
-                });
+                document.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
 
-                // Close when clicking outside image
                 lightbox.addEventListener('click', function(e) {
                     if (e.target === lightbox) {
-                        lightbox.style.display = 'none';
-                        document.body.style.overflow = 'auto';
+                        closeLightbox();
                     }
                 });
 
-                // Close with ESC key
                 document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape' && lightbox.style.display === 'block') {
-                        lightbox.style.display = 'none';
-                        document.body.style.overflow = 'auto';
+                    if (e.key === "Escape" && lightbox.classList.contains('active')) {
+                        closeLightbox();
                     }
                 });
-            });
+            };
 
-            // Original fullscreen function
-            function toggleFullscreen(button) {
+            // Tambahkan ini ke init functions
+            initLightbox();
+
+            // 5. Fullscreen toggle
+            window.toggleFullscreen = function(button) {
                 const container = document.getElementById('visualization-container');
                 if (!document.fullscreenElement) {
-                    if (container.requestFullscreen) {
-                        container.requestFullscreen();
-                        button.innerHTML = '<i class="fas fa-compress"></i>';
-                    }
+                    container.requestFullscreen?.();
+                    button.innerHTML = '<i class="fas fa-compress"></i>';
                 } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                        button.innerHTML = '<i class="fas fa-expand"></i>';
-                    }
+                    document.exitFullscreen?.();
+                    button.innerHTML = '<i class="fas fa-expand"></i>';
                 }
             }
 
-            // Export buttons functionality
+            // 6. Export Button
             document.getElementById('exportExcel')?.addEventListener('click', function() {
                 window.location.href = '{{ route('export.excel', ['upload_id' => $upload->id]) }}';
             });
@@ -488,9 +478,14 @@
                 window.location.href = '{{ route('export.pdf', ['upload_id' => $upload->id]) }}';
             });
 
+            // INIT semua
+            initClusterChart();
+            initTooltips();
+            initInsightModal();
         });
     </script>
 @endpush
+
 
 @section('styles')
     <style>
@@ -586,19 +581,6 @@
         }
 
         /* style fungsi toggle  */
-        .fullscreen-img {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            object-fit: contain;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 9999;
-            cursor: zoom-out;
-            padding: 20px;
-            box-sizing: border-box;
-        }
 
 
         .lightbox {
@@ -607,52 +589,45 @@
             z-index: 9999;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             background-color: rgba(0, 0, 0, 0.9);
-            text-align: center;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox.active {
+            display: flex;
         }
 
         .lightbox-content {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100%;
+            flex-direction: column;
+            max-height: 100%;
+            max-width: 100%;
+            overflow: auto;
         }
 
         .lightbox-image {
-            max-width: 90%;
-            max-height: 90%;
+            max-width: 100%;
+            max-height: 90vh;
             object-fit: contain;
-        }
-
-        .lightbox-close {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            color: #f1f1f1;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
         }
 
         .lightbox-caption {
-            position: absolute;
-            bottom: 20px;
-            width: 100%;
+            color: white;
+            margin-top: 15px;
+            font-size: 14px;
             text-align: center;
-            color: #fff;
-            padding: 10px 0;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        .thumbnail {
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .thumbnail:hover {
-            opacity: 0.8;
         }
     </style>
 @endsection
