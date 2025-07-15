@@ -26,7 +26,6 @@
                                     <option value="kampus">Kampus</option>
                                     <option value="jurusan">Jurusan</option>
                                     <option value="prodi">Program Studi</option>
-                                    <option value="kelas">Kelas</option>
                                 </select>
                             </div>
 
@@ -164,23 +163,83 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
+            // Initialize disabled states
+            $('#unit_name').prop('disabled', true);
+            $('#file_upload_id').prop('disabled', true);
+            $('#analyzeBtn').prop('disabled', true);
+
+            // Cakupan change handler
             $('#cakupan').change(function() {
                 const cakupan = $(this).val();
+                const unitName = $('#unit_name').val();
+
+                // Enable/disable unit name field based on cakupan selection
                 $('#unit_name').prop('disabled', !cakupan);
-                filterFilesByScope(cakupan);
+
+                // If cakupan is selected, enable file selection
+                if (cakupan) {
+                    filterFilesByScope(cakupan, unitName);
+                    $('#file_upload_id').prop('disabled', false);
+                } else {
+                    $('#file_upload_id').prop('disabled', true);
+                    $('#file_upload_id').val('');
+                    $('#analyzeBtn').prop('disabled', true);
+                }
             });
 
+            // Unit name change handler
+            $('#unit_name').change(function() {
+                const cakupan = $('#cakupan').val();
+                const unitName = $(this).val();
+
+                if (cakupan && unitName) {
+                    filterFilesByScope(cakupan, unitName);
+                    $('#file_upload_id').prop('disabled', false);
+                } else {
+                    $('#file_upload_id').prop('disabled', true);
+                    $('#file_upload_id').val('');
+                    $('#analyzeBtn').prop('disabled', true);
+                }
+            });
+
+            // File selection change handler
             $('#file_upload_id').change(function() {
                 const fileSelected = $(this).val();
                 $('#analyzeBtn').prop('disabled', !fileSelected);
             });
 
-            function filterFilesByScope(cakupan) {
+            // Filter files by scope and unit name
+            function filterFilesByScope(cakupan, unitName) {
                 $('#file_upload_id').val('');
-                $('#file_upload_id option[data-cakupan]').each(function() {
-                    const match = $(this).data('cakupan') === cakupan;
-                    $(this).toggle(match);
-                });
+                $('#analyzeBtn').prop('disabled', true);
+
+                // Show all options first
+                $('#file_upload_id option').show();
+
+                if (cakupan) {
+                    // Hide options that don't match the selected cakupan and unit name
+                    $('#file_upload_id option').each(function() {
+                        const optionCakupan = $(this).data('cakupan');
+                        const optionUnitName = $(this).data('unit-name') || '';
+
+                        // Show only matching files
+                        const shouldShow = optionCakupan === cakupan &&
+                            (unitName === '' || optionUnitName === unitName);
+                        $(this).toggle(shouldShow);
+                    });
+
+                    // If no files match, show message
+                    if ($('#file_upload_id option:visible').length === 0) {
+                        $('#file_upload_id').append(
+                            $('<option>', {
+                                value: '',
+                                text: 'Tidak ada file yang tersedia',
+                                disabled: true,
+                                selected: true
+                            })
+                        );
+                    }
+                }
             }
         });
     </script>

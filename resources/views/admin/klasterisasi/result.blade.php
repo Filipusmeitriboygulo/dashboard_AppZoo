@@ -7,6 +7,7 @@
         $hue = (($cluster - 1) * 60) % 360;
         return "hsl($hue, 70%, 60%)";
     }
+
 @endphp
 
 @section('content')
@@ -14,33 +15,61 @@
         <div class="row">
             <div class="col-12">
                 <!-- Enhanced Header Card -->
-                <div class="card shadow-sm mb-4 border-0" style="border-radius: 12px;">
+                <div class="card shadow-lg border-0 mb-4 overflow-hidden style="border-radius: 12px; border: none;">
                     <div class="card-header bg-gradient-primary text-white py-3" style="border-radius: 12px 12px 0 0;">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="mb-1">
-                                    <i class="fas fa-chart-network me-2"></i> Hasil Klasterisasi TOEFL
-                                </h3>
-                                <div class="d-flex align-items-center mt-2">
-                                    <span class="badge bg-white text-dark me-2">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-chart-network fa-lg me-2"></i>
+                                    <h3 class="mb-0">Hasil Klasterisasi TOEFL</h3>
+                                </div>
+                                <div class="d-flex flex-column align-items-center gap-2">
+                                    <span class="badge bg-white bg-opacity-20 text-dark">
                                         <i class="fas fa-hashtag me-1"></i> Upload ID: {{ $upload->id }}
                                     </span>
-                                    <span class="badge bg-white text-dark me-2">
-                                        <i class="fas fa-hashtag me-1"></i> Nama File: {{ $upload->file_name }}
+                                    <span class="badge bg-white bg-opacity-20 text-dark">
+                                        <i class="fas fa-file-alt me-1"></i> Nama File :{{ $upload->file_name }}
                                     </span>
-                                    <span class="text-white-50">
-                                        <i class="far fa-clock me-1"></i> {{ $upload->created_at->format('d/m/Y H:i') }}
+                                    <span class="text-dark text-opacity-75 small">
+                                        <i class="far fa-clock me-1"></i> Tanggal Upload
+                                        :{{ $upload->created_at->format('d/m/Y H:i') }}
                                     </span>
                                 </div>
                             </div>
-                            <div>
-                                <span class="badge bg-white text-dark py-2">
-                                    <i class="fas fa-users me-1"></i> {{ $results->count() }} Mahasiswa
-                                </span>
+
+                            <div class="d-flex flex-column ms-3" style="min-width: 180px;">
+                                <div class="alert alert-light alert-sm mb-2 p-2 text-center">
+                                    <span class="d-block fw-bold">Total</span>
+                                    {{ $totalStudents }} Mahasiswa
+                                </div>
+                                <div class="alert alert-success alert-sm mb-2 p-2 text-center">
+                                    <span class="d-block fw-bold">Lulus</span>
+                                    {{ $totalLulus }} ({{ round(($totalLulus / $totalStudents) * 100, 1) }}%)
+                                </div>
+                                <div class="alert alert-danger alert-sm p-2 text-center">
+                                    <span class="d-block fw-bold">Tidak Lulus</span>
+                                    {{ $totalTidakLulus }} ({{ round(($totalTidakLulus / $totalStudents) * 100, 1) }}%)
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <style>
+                    .alert-sm {
+                        padding: 0.35rem 0.5rem;
+                        font-size: 0.85rem;
+                        border-radius: 8px;
+                    }
+
+                    .bg-opacity-20 {
+                        background-color: rgba(255, 255, 255, 0.2);
+                    }
+
+                    .text-opacity-75 {
+                        opacity: 0.75;
+                    }
+                </style>
 
                 @if ($upload->clusterResults->isEmpty())
                     <div class="alert alert-warning shadow-sm">
@@ -57,7 +86,7 @@
                     <div class="row g-4 mb-4">
                         <!-- Visualization Card -->
                         <div class="col-lg-7">
-                            <div class="card h-100 shadow-sm border-0" style="border-radius: 12px;">
+                            <div class="card shadow-lg border-0 mb-4 overflow-hidden" style="border-radius: 12px;">
                                 <div class="card-header bg-white d-flex justify-content-between align-items-center"
                                     style="border-radius: 12px 12px 0 0;">
                                     <h4 class="mb-0 text-dark">
@@ -96,7 +125,7 @@
 
                         <!-- Distribution Card -->
                         <div class="col-lg-5">
-                            <div class="card h-100 shadow-sm border-0" style="border-radius: 12px;">
+                            <div class="card shadow-lg border-0 mb-4 overflow-hidden" style="border-radius: 12px;">
                                 <div class="card-header bg-white" style="border-radius: 12px 12px 0 0;">
                                     <h4 class="mb-0 text-dark">
                                         <i class="fas fa-chart-pie me-2"></i> Distribusi Cluster
@@ -121,152 +150,248 @@
                             </div>
                         </div>
                     </div>
+                @endif
+                </tbody>
 
-                    <!-- Recommendations Section -->
+
+                {{-- Informasi Klaster  --}}
+
+                <div class="row">
                     @if (isset($cluster_info['recommendations']))
-                        <div class="card shadow-sm mb-4 border-0" style="border-radius: 12px;">
+                        <div class="card shadow-lg border-0 mb-4 overflow-hidden" style="border-radius: 12px;">
+                            <div class="card-header bg-gradient-info text-white py-3" style="border-radius: 12px 12px 0 0;">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-chart-pie fa-lg me-3"></i>
+                                    <h4 class="mb-0">Analisis Klaster & Level CEFR</h4>
+                                </div>
+                            </div>
 
-                            <div class="card-body p-4">
-                                <div class="row g-4">
-                                    @foreach ($cluster_info['recommendations'] as $cluster => $rec)
-                                        @php
-                                            $clusterIndex = $cluster - 1;
-                                            $hue = ($clusterIndex * 60) % 360;
-                                            $color = "hsl($hue, 70%, 60%)";
-                                        @endphp
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-info">
+                                            <tr>
+                                                <th class="py-3 px-4" style="width: 20%;">Cluster</th>
+                                                <th class="py-3 px-4">Karakteristik & Rekomendasi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @php
+                                                // Sort clusters numerically by their number
+                                                $sortedClusters = collect($clusterInsights)->sortBy(function (
+                                                    $item,
+                                                    $key,
+                                                ) {
+                                                    return (int) $item['cluster'];
+                                                });
+                                            @endphp
 
-                                        <div class="col-md-4">
-                                            <div class="card h-100 border-0 shadow-sm">
-                                                <div class="card-header text-white"
-                                                    style="background-color: {{ $color }};">
-                                                    <h5 class="mb-0">
-                                                        <i
-                                                            class="fas fa-{{ $cluster == 1 ? 'exclamation-triangle' : ($cluster == 2 ? 'hourglass-half' : 'check-circle') }} me-2"></i>
-                                                        Cluster {{ $cluster }}
-                                                    </h5>
-                                                </div>
-                                                <div class="card-body">
-                                                    <ul class="list-unstyled mb-0">
-                                                        @foreach ($rec as $item)
-                                                            <li class="mb-2 d-flex align-items-start">
-                                                                <span class="badge me-2 mt-1"
-                                                                    style="background-color: {{ $color }}; color: #fff;">
-                                                                    <i class="fas fa-arrow-right"
-                                                                        style="font-size: 0.7rem;"></i>
-                                                                </span>
-                                                                <span>{{ $item }}</span>
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                            </div>
+                                            @foreach ($sortedClusters as $cluster => $info)
+                                                <tr class="border-top">
+                                                    <td class="px-4 py-3 align-top fw-semibold">
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="badge bg-primary rounded-circle me-2"
+                                                                style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;">
+                                                                {{ $info['cluster'] }}
+                                                            </span>
+                                                            Cluster {{ $info['cluster'] }}
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-4 py-3">
+                                                        <ul class="list-unstyled mb-0">
+                                                            @foreach ($info['insights'] as $insight)
+                                                                <li class="mb-2 d-flex">
+                                                                    <i class="fas fa-circle text-info me-2 mt-1"
+                                                                        style="font-size: 8px;"></i>
+                                                                    <span>{!! nl2br(e($insight)) !!}</span>
+
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Standard Info -->
+                                <div class="p-4 border-top bg-light">
+                                    <div class="alert alert-primary border-0 mb-0 d-flex align-items-center">
+                                        <i class="fas fa-graduation-cap fa-2x me-3 text-primary"></i>
+                                        <div>
+                                            <h5 class="alert-heading mb-1">Standar Kelulusan TOEFL PNL</h5>
+                                            <p class="mb-0">Minimal skor total TOEFL yang harus dicapai adalah <strong
+                                                    class="text-primary">400</strong> poin untuk dinyatakan lulus.</p>
                                         </div>
-                                    @endforeach
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     @endif
+                </div>
 
-                    <!-- Results Table -->
-                    <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px;">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center"
-                            style="border-radius: 12px 12px 0 0;">
-                            <h4 class="mb-0 text-dark">
-                                <i class="fas fa-table me-2"></i> Detail Hasil Klasterisasi
-                            </h4>
-                            <div>
-                                <button class="btn btn-sm btn-outline-success me-2" id="exportExcel">
-                                    <i class="fas fa-file-excel me-1"></i> Excel
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" id="exportPDF">
-                                    <i class="fas fa-file-pdf me-1"></i> PDF
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0" id="resultsTable">
-                                    <thead class="thead-light">
-                                        <tr>
-                                            <th width="50">No</th>
-                                            <th>Mahasiswa</th>
-                                            <th>NIM</th>
-                                            <th>Listening</th>
-                                            <th>Structure</th>
-                                            <th>Reading</th>
-                                            <th>Total</th>
-                                            <th>Cluster</th>
-                                            <th>Membership</th>
-                                            <th>Insight</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($results as $result)
-                                            <tr>
-                                                <td class="align-middle">{{ $loop->iteration }}</td>
-                                                <td class="align-middle">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="avatar bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center"
-                                                            style="width: 32px; height: 32px;">
-                                                            {{ substr($result->toeflScoreEntry->nama ?? '?', 0, 1) }}
-                                                        </div>
-                                                        <span>{{ $result->toeflScoreEntry->nama ?? '-' }}</span>
-                                                    </div>
-                                                </td>
-                                                <td class="align-middle">{{ $result->toeflScoreEntry->nim ?? '-' }}</td>
-                                                <td class="align-middle">{{ $result->toeflScoreEntry->listening ?? '-' }}
-                                                </td>
-                                                <td class="align-middle">{{ $result->toeflScoreEntry->structure ?? '-' }}
-                                                </td>
-                                                <td class="align-middle">{{ $result->toeflScoreEntry->reading ?? '-' }}
-                                                </td>
-                                                <td class="align-middle">
-                                                    <strong>{{ $result->toeflScoreEntry->total_score ?? '-' }}</strong>
-                                                </td>
-                                                <td class="align-middle">
-                                                    @php
-                                                        $clusterIndex = $result->cluster - 1; // karena index dimulai dari 0
-                                                        $hue = ($clusterIndex * 60) % 360;
-                                                        $color = "hsl($hue, 70%, 60%)";
-                                                    @endphp
+                <!-- Recommendations Section -->
+                @if (isset($cluster_info['recommendations']))
+                    <div class="card shadow-sm mb-4 border-0" style="border-radius: 12px;">
 
-                                                    <span class="badge py-2"
-                                                        style="background-color: {{ $color }}; color: #fff;">
-                                                        Cluster {{ $result->cluster }}
-                                                    </span>
+                        <div class="card-body p-4">
+                            <div class="row g-4">
+                                @foreach ($cluster_info['recommendations'] as $cluster => $rec)
+                                    @php
+                                        $clusterIndex = $cluster - 1;
+                                        $hue = ($clusterIndex * 60) % 360;
+                                        $color = "hsl($hue, 70%, 60%)";
+                                    @endphp
 
-                                                </td>
-                                                <td>
-                                                    <ul class="mb-0 ps-3">
-                                                        @foreach (collect($result->membership)->sortKeys() as $key => $value)
-                                                            @php
-                                                                $label = Str::startsWith($key, 'Membership_Cluster_')
-                                                                    ? 'Cluster ' .
-                                                                        Str::after($key, 'Membership_Cluster_')
-                                                                    : $key;
-                                                            @endphp
-                                                            <li>{{ $label }}: {{ round((float) $value * 100, 1) }}%
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                </td>
-
-
-                                                <td class="align-middle">
-                                                    <button class="btn btn-sm btn-outline-secondary insight-btn"
-                                                        data-bs-toggle="tooltip" title="Lihat insight"
-                                                        data-insight="{{ $result->insight }}">
-                                                        <i class="fas fa-info-circle"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                                    <div class="col-md-4">
+                                        <div class="card h-100 border-0 shadow-sm">
+                                            <div class="card-header text-white"
+                                                style="background-color: {{ $color }};">
+                                                <h5 class="mb-0">
+                                                    <i
+                                                        class="fas fa-{{ $cluster == 1 ? 'exclamation-triangle' : ($cluster == 2 ? 'hourglass-half' : 'check-circle') }} me-2"></i>
+                                                    Cluster {{ $cluster }}
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <ul class="list-unstyled mb-0">
+                                                    @foreach ($rec as $item)
+                                                        <li class="mb-2 d-flex align-items-start">
+                                                            <span class="badge me-2 mt-1"
+                                                                style="background-color: {{ $color }}; color: #fff;">
+                                                                <i class="fas fa-arrow-right"
+                                                                    style="font-size: 0.7rem;"></i>
+                                                            </span>
+                                                            <span>{{ $item }}</span>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                     </div>
                 @endif
+
+                <!-- Results Table -->
+                <div class="card shadow-lg border-0 mb-4 overflow-hidden" style="border-radius: 12px;">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center"
+                        style="border-radius: 12px 12px 0 0;">
+                        <h4 class="mb-0 text-dark">
+                            <i class="fas fa-table me-2"></i> Detail Hasil Klasterisasi
+                        </h4>
+                        <div>
+                            <button class="btn btn-sm btn-outline-success me-2" id="exportExcel">
+                                <i class="fas fa-file-excel me-1"></i> Excel
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" id="exportPDF">
+                                <i class="fas fa-file-pdf me-1"></i> PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="resultsTable">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th width="50">No</th>
+                                        <th>Mahasiswa</th>
+                                        <th>NIM</th>
+                                        <th>Listening</th>
+                                        <th>Structure</th>
+                                        <th>Reading</th>
+                                        <th>Total</th>
+                                        <th>Cluster</th>
+                                        <th>Membership</th>
+                                        <th>Status Lulus</th>
+                                        <th>Insight</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($results as $result)
+                                        <tr>
+                                            <td class="align-middle">
+                                                {{ ($results->currentPage() - 1) * $results->perPage() + $loop->iteration }}
+                                            </td>
+
+                                            <td class="align-middle">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center"
+                                                        style="width: 32px; height: 32px;">
+                                                        {{ substr($result->toeflScoreEntry->nama ?? '?', 0, 1) }}
+                                                    </div>
+                                                    <span>{{ $result->toeflScoreEntry->nama ?? '-' }}</span>
+                                                </div>
+                                            </td>
+                                            <td class="align-middle">{{ $result->toeflScoreEntry->nim ?? '-' }}</td>
+                                            <td class="align-middle">{{ $result->toeflScoreEntry->listening ?? '-' }}
+                                            </td>
+                                            <td class="align-middle">{{ $result->toeflScoreEntry->structure ?? '-' }}
+                                            </td>
+                                            <td class="align-middle">{{ $result->toeflScoreEntry->reading ?? '-' }}
+                                            </td>
+                                            <td class="align-middle">
+                                                <strong>{{ $result->toeflScoreEntry->total_score ?? '-' }}</strong>
+                                            </td>
+                                            <td class="align-middle">
+                                                @php
+                                                    $clusterIndex = $result->cluster - 1; // karena index dimulai dari 0
+                                                    $hue = ($clusterIndex * 60) % 360;
+                                                    $color = "hsl($hue, 70%, 60%)";
+                                                @endphp
+
+                                                <span class="badge py-2"
+                                                    style="background-color: {{ $color }}; color: #fff;">
+                                                    Cluster {{ $result->cluster }}
+                                                </span>
+
+                                            </td>
+                                            <td>
+                                                <ul class="mb-0 ps-3">
+                                                    @foreach (collect($result->membership)->sortKeys() as $key => $value)
+                                                        @php
+                                                            $label = Str::startsWith($key, 'Membership_Cluster_')
+                                                                ? 'Cluster ' . Str::after($key, 'Membership_Cluster_')
+                                                                : $key;
+                                                        @endphp
+                                                        <li>{{ $label }}: {{ round((float) $value * 100, 1) }}%
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </td>
+                                            <td class="align-middle">
+                                                @if (isset($result->status_lulus))
+                                                    <span
+                                                        class="badge {{ $result->status_lulus === 'Lulus' ? 'bg-success' : 'bg-danger' }}">
+                                                        {{ $result->status_lulus }}
+                                                    </span>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+                                            <td class="align-middle">
+                                                <button class="btn btn-sm btn-outline-secondary insight-btn"
+                                                    data-bs-toggle="tooltip" title="Lihat insight"
+                                                    data-insight="{!! nl2br(e($result->insight)) !!}">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer bg-white py-3 px-4">
+                            <div class="d-flex justify-content-center">
+                                {{ $results->links('pagination::bootstrap-5') }}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -306,7 +431,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+
+
             // 1. Chart Cluster
+
             const initClusterChart = () => {
                 const ctx = document.getElementById('clusterBarChart');
                 const chartError = document.getElementById('chartError');
@@ -325,6 +453,7 @@
 
                     const total = sortedKeys.reduce((sum, key) => sum + clusterData[key], 0);
                     const labels = sortedKeys.map(key => `Cluster ${key.replace('cluster_', '')}`);
+
                     const data = sortedKeys.map(key => clusterData[key]);
                     const backgroundColors = sortedKeys.map(key => {
                         const index = parseInt(key.replace('cluster_', '')) - 1;
@@ -360,6 +489,10 @@
                                             return `${context.raw} mahasiswa (${percentage}%)`;
                                         }
                                     }
+                                },
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
                                 }
                             },
                             scales: {
@@ -407,7 +540,7 @@
                 insightButtons.forEach(button => {
                     button.addEventListener('click', function() {
                         const insight = this.getAttribute('data-insight');
-                        insightContent.textContent = insight || 'Tidak ada insight tersedia';
+                        insightContent.innerHTML = insight || 'Tidak ada insight tersedia';
                         insightModal.show();
                     });
                 });
@@ -628,6 +761,14 @@
             margin-top: 15px;
             font-size: 14px;
             text-align: center;
+        }
+
+        .badge.bg-success {
+            background-color: #28a745 !important;
+        }
+
+        .badge.bg-danger {
+            background-color: #dc3545 !important;
         }
     </style>
 @endsection

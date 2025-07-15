@@ -15,7 +15,8 @@ class ClusterResult extends Model
         'upload_id', // Tetap pertahankan untuk query langsung
         'cluster',
         'membership',
-        'insight'
+        'insight',
+        'status_lulus',
     ];
 
     protected $casts = [
@@ -33,6 +34,4 @@ class ClusterResult extends Model
     {
         return $this->belongsTo(UploadLog::class, 'upload_id');
     }
-
-
 }

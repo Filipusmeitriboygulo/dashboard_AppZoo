@@ -41,6 +41,7 @@ class KlasterisasiExport implements FromCollection, WithHeadings, WithMapping, W
             'Reading Score',
             'Total Score',
             'Cluster',
+            'Status Lulus',
             'Insight & Rekomendasi'
         ];
     }
@@ -59,14 +60,15 @@ class KlasterisasiExport implements FromCollection, WithHeadings, WithMapping, W
             $result->toeflScoreEntry->reading ?? '-',
             $result->toeflScoreEntry->total_score ?? '-',
             'Cluster ' . $result->cluster,
+            $result->status_lulus ?? '-',
             $result->insight ?? 'Tidak ada insight tersedia'
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
+        $rowCount = $this->collection()->count() + 1; // +1 for heading
         return [
-            // Header row styling
             1 => [
                 'font' => [
                     'bold' => true,
@@ -81,8 +83,7 @@ class KlasterisasiExport implements FromCollection, WithHeadings, WithMapping, W
                     'vertical' => Alignment::VERTICAL_CENTER
                 ]
             ],
-            // All cells border
-            'A1:I' . ($this->collection()->count() + 1) => [
+            "A1:J$rowCount" => [ // Apply border to all cells
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -90,13 +91,12 @@ class KlasterisasiExport implements FromCollection, WithHeadings, WithMapping, W
                     ]
                 ]
             ],
-            // Center align for specific columns
             'A:A' => ['alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]], // No
             'C:C' => ['alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]], // NIM
             'D:G' => ['alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]], // Scores
             'H:H' => ['alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]], // Cluster
-            // Wrap text for insight column
-            'I:I' => [
+            'I:I' => ['alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]], // Status Lulus
+            'J:J' => [
                 'alignment' => [
                     'wrapText' => true,
                     'vertical' => Alignment::VERTICAL_TOP
@@ -116,7 +116,8 @@ class KlasterisasiExport implements FromCollection, WithHeadings, WithMapping, W
             'F' => 12,  // Reading
             'G' => 12,  // Total
             'H' => 12,  // Cluster
-            'I' => 50,  // Insight (lebih lebar)
+            'I' => 15,  // Status Lulus
+            'J' => 50,  // Insight
         ];
     }
 

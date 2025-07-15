@@ -11,17 +11,27 @@
             line-height: 1.4;
         }
 
-        .header {
-            margin-bottom: 20px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
+        .header-flex-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            align-items: flex-start;
+            flex-wrap: wrap;
         }
 
-        .header h2 {
-            margin: 0 0 10px 0;
-            font-size: 16px;
-            color: #333;
+        .header-left,
+        .header-right {
+            flex: 1;
+            min-width: 250px;
         }
+
+        .header-right {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            font-size: 9px;
+        }
+
 
         .info-grid {
             display: table;
@@ -105,9 +115,15 @@
             width: 10%;
         }
 
+        .col-status {
+            width: 10%;
+        }
+
+
         .col-insight {
             width: 27%;
         }
+
 
         /* Text wrapping for insight column */
         .insight-text {
@@ -177,34 +193,72 @@
     <div class="header">
         <h2>Hasil Klasterisasi TOEFL</h2>
 
-        <div class="info-grid">
-            <div class="info-row">
-                <div class="info-label">Upload ID:</div>
-                <div class="info-value">{{ $upload->id }}</div>
+        {{-- Hitung  Total Lusu, dan Distribusi Klaster--}}
+        @php
+            $clusterCounts = $results->groupBy('cluster')->map->count();
+            $totalStudents = $results->count();
+
+            $totalLulus = $results->where('status_lulus', 'Lulus')->count();
+            $totalTidakLulus = $results->where('status_lulus', 'Tidak Lulus')->count();
+        @endphp
+
+        <div class="header-flex-container">
+            <!-- Kiri: Info Upload -->
+            <div class="header-left">
+                <div class="info-grid">
+                    <div class="info-row">
+                        <div class="info-label">Upload ID:</div>
+                        <div class="info-value">{{ $upload->id }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Tanggal:</div>
+                        <div class="info-value">{{ $upload->created_at->format('d M Y H:i') }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Cakupan:</div>
+                        <div class="info-value">{{ $upload->cakupan ?? '-' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Nama File:</div>
+                        <div class="info-value">{{ $upload->file_name }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Unit:</div>
+                        <div class="info-value">{{ $upload->unit_nama ?? '-' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Total Mahasiswa:</div>
+                        <div class="info-value">{{ $results->count() }} orang</div>
+                    </div>
+                </div>
             </div>
-            <div class="info-row">
-                <div class="info-label">Tanggal:</div>
-                <div class="info-value">{{ $upload->created_at->format('d M Y H:i') }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Cakupan:</div>
-                <div class="info-value">{{ $upload->cakupan ?? '-' }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Nama File:</div>
-                <div class="info-value">{{ $upload->file_name }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Unit:</div>
-                <div class="info-value">{{ $upload->unit_nama ?? '-' }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Total Mahasiswa:</div>
-                <div class="info-value">{{ $results->count() }} orang</div>
+
+            <!-- Kanan: Ringkasan -->
+            <div class="header-right">
+                <h3 style="font-size: 11px; margin-top: 0;">Ringkasan Distribusi</h3>
+                <div class="info-grid">
+                    @foreach ($clusterCounts as $cluster => $count)
+                        <div class="info-row">
+                            <div class="info-label">Cluster {{ $cluster }}:</div>
+                            <div class="info-value">{{ $count }} mahasiswa
+                                ({{ round(($count / $totalStudents) * 100, 1) }}%)
+                            </div>
+                        </div>
+                    @endforeach
+                    <div class="info-row">
+                        <div class="info-label">Total Lulus:</div>
+                        <div class="info-value">{{ $totalLulus }} mahasiswa
+                            ({{ round(($totalLulus / $totalStudents) * 100, 1) }}%)</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Tidak Lulus:</div>
+                        <div class="info-value">{{ $totalTidakLulus }} mahasiswa
+                            ({{ round(($totalTidakLulus / $totalStudents) * 100, 1) }}%)</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
     <table>
         <thead>
             <tr>
@@ -216,6 +270,7 @@
                 <th class="col-reading">Reading</th>
                 <th class="col-total">Total</th>
                 <th class="col-cluster">Cluster</th>
+                <th class="col-status">Status Lulus</th>
                 <th class="col-insight">Insight & Rekomendasi</th>
             </tr>
         </thead>
@@ -232,6 +287,10 @@
                     <td class="text-center">
                         <span class="cluster-badge">Cluster {{ $result->cluster }}</span>
                     </td>
+                    <td class="text-center">
+                        {{ $result->status_lulus ?? '-' }}
+                    </td>
+
                     <td>
                         <div class="insight-text">
                             {{ $result->insight ?? 'Tidak ada insight tersedia' }}
@@ -243,23 +302,8 @@
     </table>
 
     <!-- Summary Section -->
-    @php
-        $clusterCounts = $results->groupBy('cluster')->map->count();
-        $totalStudents = $results->count();
-    @endphp
 
-    <div class="summary">
-        <h3>Ringkasan Distribusi Cluster</h3>
-        <div class="info-grid">
-            @foreach ($clusterCounts as $cluster => $count)
-                <div class="info-row">
-                    <div class="info-label">Cluster {{ $cluster }}:</div>
-                    <div class="info-value">{{ $count }} mahasiswa
-                        ({{ round(($count / $totalStudents) * 100, 1) }}%)</div>
-                </div>
-            @endforeach
-        </div>
-    </div>
+
 
     <div style="margin-top: 30px; font-size: 8px; color: #666; text-align: center;">
         Dicetak pada: {{ now()->format('d M Y H:i:s') }} |
