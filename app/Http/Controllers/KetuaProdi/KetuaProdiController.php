@@ -5,6 +5,7 @@ namespace App\Http\Controllers\KetuaProdi;
 use App\Http\Controllers\Controller;
 use App\Models\UploadLog;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -39,6 +40,23 @@ class KetuaProdiController extends Controller
     {
         $upload = UploadLog::with(['clusterResults', 'clusterResults.toeflScoreEntry'])->findOrFail($upload_id);
 
+
+
+        // Ambil semua clusterResults lalu paginasi manual (jika bukan relasi langsung paginateable)
+        $clusterResults = $upload->clusterResults;
+
+        // Manual pagination
+        $perPage = 10;
+        $currentPage = request()->get('page', 1);
+        $pagedResults = new LengthAwarePaginator(
+            $clusterResults->forPage($currentPage, $perPage),
+            $clusterResults->count(),
+            $perPage,
+            $currentPage,
+            ['path' => route('klasterisasi.result', ['upload_id' => $upload_id])]
+        );
+
+
         // Hitung jumlah per cluster untuk chart
         $clusterCounts = $upload->clusterResults
             ->groupBy('cluster')
@@ -47,12 +65,27 @@ class KetuaProdiController extends Controller
             })
             ->toArray();
 
+        // Ambil insight per klaster dari hasil cluster yang disimpan
+        $clusterInsights = $upload->clusterResults
+            ->groupBy('cluster')
+            ->map(function ($items, $cluster) {
+                // Ambil insight unik untuk tiap klaster
+                $uniqueInsights = $items->pluck('insight')->filter()->unique()->values();
+                return [
+                    'cluster' => $cluster,
+                    'insights' => $uniqueInsights
+                ];
+            });
 
 
-        // Handle cluster data
+        // Hitung total lulus dan tidak lulus
+        $totalLulus = $upload->clusterResults->where('status_lulus', 'Lulus')->count();
+        $totalTidakLulus = $upload->clusterResults->where('status_lulus', 'Tidak Lulus')->count();
+        $totalStudents = $upload->clusterResults->count();
+
         $cluster_info = [];
-        $visualization = $cluster_info['visualization'] ?? null;
-        // dd($upload);
+        $visualization = null;
+
         if ($upload->cluster_data) {
             try {
                 $cluster_info = json_decode($upload->cluster_data, true, 512, JSON_THROW_ON_ERROR);
@@ -68,34 +101,24 @@ class KetuaProdiController extends Controller
                 }
 
                 $apiResult = $response->json();
-                // dd($apiResult);
                 $gambar = $apiResult["data"]["visualization"];
-                // dd($gambar);
 
-
-                // Validasi struktur data
                 if (!isset($cluster_info['centroids'])) {
                     $cluster_info['centroids'] = [];
                 }
                 if (!isset($cluster_info['recommendations'])) {
                     $cluster_info['recommendations'] = [];
                 }
-                if ($visualization) {
-                    // Bersihkan whitespace
-                    $visualization = trim($visualization);
 
-                    // Pastikan format data URI benar
-                    if (!str_starts_with($visualization, 'data:image')) {
-                        // Hanya tambahkan prefix jika string tidak kosong
-                        $visualization = !empty($visualization) ? 'data:image/png;base64,' . $visualization : null;
+                if ($gambar) {
+                    $gambar = trim($gambar);
+                    if (!str_starts_with($gambar, 'data:image')) {
+                        $gambar = !empty($gambar) ? 'data:image/png;base64,' . $gambar : null;
                     }
-
-                    // Validasi base64
-                    if ($visualization && !base64_decode(explode(',', $visualization)[1] ?? '', true)) {
-                        $visualization = null; // Invalid base64
+                    if ($gambar && !base64_decode(explode(',', $gambar)[1] ?? '', true)) {
+                        $gambar = null;
                     }
                 }
-                // dd($visualization);
             } catch (\JsonException $e) {
                 Log::error('Failed to decode cluster data', [
                     'upload_id' => $upload_id,
@@ -106,11 +129,15 @@ class KetuaProdiController extends Controller
         }
 
         return view('admin.klasterisasi.result', [
-            'results' => $upload->clusterResults,
+            'results' => $pagedResults,
             'cluster_info' => $cluster_info,
             'upload' => $upload,
-            'visualization' => $gambar,
-            'cluster_counts' => $clusterCounts // Kirim data counts ke view
+            'visualization' => $gambar ?? null,
+            'cluster_counts' => $clusterCounts,
+            'totalLulus' => $totalLulus,
+            'totalTidakLulus' => $totalTidakLulus,
+            'totalStudents' => $totalStudents,
+            'clusterInsights' => $clusterInsights
         ]);
     }
 }
