@@ -10,7 +10,7 @@
                       SELAMAT DATANG DI
                   </h2>
                   <h1 style="font-weight: 700; line-height: 1.2; font-size:40px">
-                      Sistem Klasterisasi Menggunakan Algoritma Fuzzy C-Means <br> Nilai TOEFL <br> UPA Bahasa <br>
+                      Sistem Klasterisasi <br> Nilai TOEFL <br> Menggunakan Algoritma Fuzzy C-Means <br> UPA Bahasa <br>
                       Politeknik Negeri Lhokseumawe
                   </h1>
 

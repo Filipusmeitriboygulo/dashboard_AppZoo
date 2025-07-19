@@ -209,38 +209,28 @@
             });
 
             // Filter files by scope and unit name
-            function filterFilesByScope(cakupan, unitName) {
-                $('#file_upload_id').val('');
-                $('#analyzeBtn').prop('disabled', true);
+            function filterFilesByScope(cakupan) {
+                $('#file_upload_id').val(''); // Reset pilihan file
 
-                // Show all options first
-                $('#file_upload_id option').show();
+                $('#file_upload_id option[data-cakupan]').each(function() {
+                    const optionCakupan = $(this).data('cakupan');
+                    const isMatch = cakupan === 'kampus' ? optionCakupan === 'kampus' : optionCakupan ===
+                        cakupan;
+                    $(this).toggle(isMatch);
+                });
 
-                if (cakupan) {
-                    // Hide options that don't match the selected cakupan and unit name
-                    $('#file_upload_id option').each(function() {
-                        const optionCakupan = $(this).data('cakupan');
-                        const optionUnitName = $(this).data('unit-name') || '';
-
-                        // Show only matching files
-                        const shouldShow = optionCakupan === cakupan &&
-                            (unitName === '' || optionUnitName === unitName);
-                        $(this).toggle(shouldShow);
-                    });
-
-                    // If no files match, show message
-                    if ($('#file_upload_id option:visible').length === 0) {
-                        $('#file_upload_id').append(
-                            $('<option>', {
-                                value: '',
-                                text: 'Tidak ada file yang tersedia',
-                                disabled: true,
-                                selected: true
-                            })
-                        );
-                    }
+                // Tampilkan pesan jika tidak ada file yang cocok
+                if ($('#file_upload_id option:visible').length === 0) {
+                    $('#file_upload_id').append(
+                        $('<option>', {
+                            text: 'Tidak ada file yang tersedia',
+                        })
+                    );
                 }
             }
+
+
+
         });
     </script>
 @endpush
