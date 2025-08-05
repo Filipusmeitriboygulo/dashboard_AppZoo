@@ -22,6 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('cluster_result', function (Blueprint $table) {
+            // function (Blueprint $table) {
             //
         });
     }

@@ -25,16 +25,19 @@ class KetuaProdiController extends Controller
         }
 
         $file_uploads = UploadLog::where('cakupan', 'prodi')
+            ->where('status_klasterisasi', 'sudah') // hanya yang sudah diklasterisasi
             ->whereHas('toeflScores', function ($query) use ($prodiId) {
                 $query->where('study_program_id', $prodiId);
             })
             ->with(['toeflScores' => function ($query) use ($prodiId) {
                 $query->where('study_program_id', $prodiId);
             }])
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return view('admin.klasterisasi.index', compact('file_uploads'));
     }
+
 
     public function result($upload_id)
     {

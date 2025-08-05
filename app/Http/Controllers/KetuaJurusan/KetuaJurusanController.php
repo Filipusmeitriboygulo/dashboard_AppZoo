@@ -22,31 +22,36 @@ class KetuaJurusanController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil semua id prodi yang berada di bawah jurusan dia
+        // Ambil semua ID prodi yang berada di bawah jurusan user
         $prodiIds = $user->department->studyPrograms->pluck('id')->toArray();
 
-        // Ambil nama jurusan (untuk cocok dengan kolom unit_nama jika cakupan = jurusan)
+        // Ambil nama jurusan (untuk mencocokkan unit_nama jika cakupan = jurusan)
         $namaJurusan = $user->department->name;
 
-        $file_uploads = UploadLog::where(function ($query) use ($prodiIds, $namaJurusan) {
-            $query->where(function ($q) use ($prodiIds) {
-                // Jika cakupan adalah 'prodi' dan prodi-nya milik jurusan dia
-                $q->where('cakupan', 'prodi')
-                    ->whereHas('toeflScores', function ($subQuery) use ($prodiIds) {
-                        $subQuery->whereIn('study_program_id', $prodiIds);
-                    });
-            })->orWhere(function ($q) use ($namaJurusan) {
-                // Jika cakupan adalah 'jurusan' dan sesuai dengan jurusan dia
-                $q->where('cakupan', 'jurusan')
-                    ->where('unit_nama', $namaJurusan);
-            });
-        })
+        // Ambil file upload yang sudah diklasterisasi dan relevan dengan jurusan/prodi dia
+        $file_uploads = UploadLog::where('status_klasterisasi', 'sudah') // hanya yang sudah diklaster
+            ->where(function ($query) use ($prodiIds, $namaJurusan) {
+                $query->where(function ($q) use ($prodiIds) {
+                    // Jika cakupan = prodi dan prodi-nya milik jurusan ini
+                    $q->where('cakupan', 'prodi')
+                        ->whereHas('toeflScores', function ($subQuery) use ($prodiIds) {
+                            $subQuery->whereIn('study_program_id', $prodiIds);
+                        });
+                })->orWhere(function ($q) use ($namaJurusan) {
+                    // Jika cakupan = jurusan dan nama jurusannya cocok
+                    $q->where('cakupan', 'jurusan')
+                        ->where('unit_nama', $namaJurusan);
+                });
+            })
             ->with(['toeflScores' => function ($query) use ($prodiIds) {
                 $query->whereIn('study_program_id', $prodiIds);
-            }])->get();
+            }])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('admin.klasterisasi.index', compact('file_uploads'));
     }
+
 
 
     public function result($upload_id)

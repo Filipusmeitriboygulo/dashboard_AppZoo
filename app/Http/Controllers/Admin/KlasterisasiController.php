@@ -74,7 +74,7 @@ class KlasterisasiController extends Controller
             }
 
             $apiResult = $response->json();
-            dd($apiResult);
+            // dd($apiResult);
 
             if ($apiResult['status'] !== 'success') {
                 throw new \Exception($apiResult['message'] ?? 'Invalid API response');
@@ -82,6 +82,8 @@ class KlasterisasiController extends Controller
 
 
             // $student_results = $apiResult['data']['student_results'];
+            $student_results = $apiResult['data']['student_results'];
+
             $clusterInsights = [];
 
             foreach ($student_results as $result) {
@@ -96,6 +98,7 @@ class KlasterisasiController extends Controller
                     $clusterInsights[$clusterKey][] = $insight;
                 }
             }
+
 
             DB::beginTransaction();
 
@@ -161,7 +164,7 @@ class KlasterisasiController extends Controller
             return redirect()->back()->withErrors('File tidak ditemukan untuk dianalisis ulang.');
         }
 
-        
+
         try {
             // Hapus hasil klasterisasi sebelumnya
             ClusterResult::where('upload_id', $upload->id)->delete();
@@ -228,7 +231,7 @@ class KlasterisasiController extends Controller
     {
         $upload = UploadLog::with(['clusterResults', 'clusterResults.toeflScoreEntry'])->findOrFail($upload_id);
 
-    
+
 
         // Ambil semua clusterResults lalu paginasi manual (jika bukan relasi langsung paginateable)
         $clusterResults = $upload->clusterResults;
@@ -328,6 +331,4 @@ class KlasterisasiController extends Controller
             'clusterInsights' => $clusterInsights
         ]);
     }
-
-
 }
