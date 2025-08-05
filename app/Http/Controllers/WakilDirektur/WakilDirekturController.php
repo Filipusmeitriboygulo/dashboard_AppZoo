@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\UploadLog;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 
@@ -13,9 +14,21 @@ class WakilDirekturController extends Controller
 {
     public function index()
     {
-        $file_uploads = UploadLog::orderBy('created_at', 'desc')->get();
+        $user = Auth::user();
+
+        // Jika user adalah wakil direktur, hanya tampilkan yang sudah diklasterisasi
+        if ($user->role === 'wakil_direktur') {
+            $file_uploads = UploadLog::where('status_klasterisasi', 'sudah')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            // Untuk role lain seperti admin, tampilkan semua
+            $file_uploads = UploadLog::orderBy('created_at', 'desc')->get();
+        }
+
         return view('admin.klasterisasi.index', compact('file_uploads'));
     }
+
 
     public function result($upload_id)
     {
