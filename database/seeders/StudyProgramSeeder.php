@@ -22,7 +22,7 @@ class StudyProgramSeeder extends Seeder
         $studyPrograms = [
             // Teknik Elektro
             
-            ['department_id' => $te->id, 'name' => 'Teknologi Elektronika', 'code' => 'TEL'],
+            ['department_id' => $te->id, 'name' => 'Teknologi Elektronika', 'code' => 'TE'],
             ['department_id' => $te->id, 'name' => 'Teknologi Listrik', 'code' => 'TL'],
             ['department_id' => $te->id, 'name' => 'Teknologi Telekomunikasi', 'code' => 'T.Telkom'],
             ['department_id' => $te->id, 'name' => 'Teknologi Rekayasa Jaringan Telekomunikasi', 'code' => 'TRJT'],
@@ -38,7 +38,7 @@ class StudyProgramSeeder extends Seeder
 
             // Teknik Sipil
             ['department_id' => $ts->id, 'name' => 'Teknologi Rekayasa Konstruksi Jalan dan Jembatan', 'code' => 'TRKJJ'],
-            ['department_id' => $ts->id, 'name' => 'Teknologi Konstursi Bangunan Gedung', 'code' => 'TKBG'],
+            ['department_id' => $ts->id, 'name' => 'Teknologi Rekayasa Konstursi Bangunan Gedung', 'code' => 'TRKBG'],
             ['department_id' => $ts->id, 'name' => 'Teknologi Konstursi Bangunan Air', 'code' => 'TKBA'],
             ['department_id' => $ts->id, 'name' => 'Teknologi Konstruksi Jalan dan Jembatan', 'code' => 'TKJJ'],
 
@@ -49,10 +49,10 @@ class StudyProgramSeeder extends Seeder
 
 
             //  Bisnis
-            ['department_id' => $bs->id, 'name' => 'Adm.Bisnis', 'code' => 'ADB'],
+            ['department_id' => $bs->id, 'name' => 'Administrasi Bisnis', 'code' => 'ADM.BISNIS'],
             ['department_id' => $bs->id, 'name' => 'Akuntasi Lembaga Keuangan Syariah', 'code' => 'ALKS'],
             ['department_id' => $bs->id, 'name' => 'Akuntasi Sektor Publik', 'code' => 'ASP'],
-            ['department_id' => $bs->id, 'name' => 'Akuntasi', 'code' => 'AK'],
+            ['department_id' => $bs->id, 'name' => 'Akuntasi', 'code' => 'AKUNTANSI'],
             ['department_id' => $bs->id, 'name' => 'Manajemen Keuangan Sektor Publik', 'code' => 'MKSP'],
 
             // TIK

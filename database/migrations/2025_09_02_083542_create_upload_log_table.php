@@ -11,17 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-
         Schema::create('upload_log', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('file_name');
+            $table->increments('id');
+            $table->unsignedInteger('user_id');
+            $table->string('file_name', 255);
+
+            // No. 4: cakupan (enum) - Sesuai permintaan
             $table->enum('cakupan', ['kampus', 'jurusan', 'prodi', 'kelas']);
-            $table->string('unit_nama');
-            $table->dateTime('waktu_upload')->useCurrent();
+
+            $table->string('unit_nama', 100);
+
+            // No. 6: status_klasterisasi (enum) - Sesuai permintaan
             $table->enum('status_klasterisasi', ['sudah', 'belum'])->default('belum');
-            // $table->integer('jumlah_data');
-            $table->timestamps();
+
+            $table->dateTime('waktu_upload')->useCurrent();
+            $table->longText('cluster_insights')->nullable();
+
+            // Definisi Foreign Key ke tabel users
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

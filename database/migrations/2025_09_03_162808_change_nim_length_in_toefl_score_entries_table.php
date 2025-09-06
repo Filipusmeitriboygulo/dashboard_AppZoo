@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Mengubah tabel toefl_score_entries
         Schema::table('toefl_score_entries', function (Blueprint $table) {
-            $table->unsignedBigInteger('departement_id')->nullable()->after('study_program_id');
-            $table->foreign('departement_id')->references('id')->on('departments')->onDelete('set null');
+            // Mengubah kolom 'nim' menjadi string dengan panjang 14
+            $table->string('nim', 14)->change();
         });
     }
 
@@ -22,8 +23,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Mengembalikan kolom 'nim' ke panjang semula (12) jika di-rollback
         Schema::table('toefl_score_entries', function (Blueprint $table) {
-            //
+            $table->string('nim', 12)->change();
         });
     }
 };

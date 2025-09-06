@@ -54,7 +54,7 @@
                                                 <span class="badge bg-{{ $user->is_active ? 'success' : 'danger' }}">
                                                     {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
                                                 </span>
-                                            </td>
+                                            </td>  
                                             <td class="text-center">
                                                 <div class="btn-group" role="group" aria-label="Basic example">
                                                     <!-- Tombol View (Link ke detail page) -->

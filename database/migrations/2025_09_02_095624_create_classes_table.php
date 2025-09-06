@@ -6,20 +6,26 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('classes', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('study_program_id')->constrained()->onDelete('cascade');
-            $table->string('name');
-            // $table->string('academic_year', 10);
+            $table->increments('id');
+            $table->string('name', 100); // Kolom untuk nama kelas
             $table->integer('semester');
+            $table->unsignedInteger('study_program_id');
             $table->timestamps();
 
-            // $table->index(['study_program_id', 'academic_year', 'semester']);
+            // Membuat relasi ke tabel study_programs
+            $table->foreign('study_program_id')->references('id')->on('study_programs')->onDelete('cascade');
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('classes');

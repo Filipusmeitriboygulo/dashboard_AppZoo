@@ -32,34 +32,6 @@ class UploadLogController extends Controller
         return view('admin.data-upload.index', compact('files', 'departments'));
     }
 
-    // public function upload(Request $request)
-    // {
-    //     $request->validate([
-    //         'fileExcel' => 'required|file|mimes:xlsx,xls,csv|max:10240',
-    //     ]);
-
-    //     $user = Auth::user();
-    //     $file = $request->file('fileExcel');
-    //     $filename = 'toefl_' . time() . '.' . $file->getClientOriginalExtension();
-    //     $path = $file->storeAs('uploads/toefl', $filename, 'public');
-
-    //     $log = UploadLog::create([
-    //         'user_id' => $user->id,
-    //         'file_name' => $filename,
-    //         'cakupan' => $request->scope ?? 'campus',
-    //         'unit_nama' => $request->scope_id ?? 'ALL',
-    //         'waktu_upload' => now(),
-    //         'status_klasterisasi' => 'pending',
-    //     ]);
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'File uploaded successfully',
-    //         'batch_id' => $log->id,
-    //         'file_path' => $path,
-    //         'file_type' => $file->getClientOriginalExtension(),
-    //     ]);
-    // }
 
     public function upload(Request $request)
     {
@@ -112,16 +84,7 @@ class UploadLogController extends Controller
             ], 500);
         }
     }
-    // Tambahkan method formatBytes dalam controller
-    // protected function formatBytes($bytes, $precision = 2)
-    // {
-    //     $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    //     $bytes = max($bytes, 0);
-    //     $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
-    //     $pow = min($pow, count($units) - 1);
-    //     $bytes /= pow(1024, $pow);
-    //     return round($bytes, $precision) . ' ' . $units[$pow];
-    // }
+
 
     public function process(Request $request)
     {

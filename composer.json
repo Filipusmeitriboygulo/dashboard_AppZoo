@@ -10,6 +10,7 @@
     "require": {
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "dev-master as 4.0",
+        "doctrine/dbal": "^4.3",
         "guzzlehttp/guzzle": "^7.0",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",

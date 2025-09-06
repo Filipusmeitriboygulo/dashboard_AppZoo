@@ -12,7 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('upload_log', function (Blueprint $table) {
+            // No. 8: Menambahkan kolom cluster_data (longtext)
             $table->longText('cluster_data')->nullable()->after('status_klasterisasi');
+
+            // No. 9 & 10: Menambahkan kolom created_at dan updated_at
+            $table->timestamps();
         });
     }
 
@@ -23,6 +27,7 @@ return new class extends Migration
     {
         Schema::table('upload_log', function (Blueprint $table) {
             $table->dropColumn('cluster_data');
+            $table->dropTimestamps();
         });
     }
 };

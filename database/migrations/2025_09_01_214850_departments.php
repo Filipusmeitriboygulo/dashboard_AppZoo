@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('cluster_result', function (Blueprint $table) {
-            $table->string('jurusan');
+        Schema::create('departments', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name', 100);
+            $table->char('code', 10)->unique();
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('cluster_result', function (Blueprint $table) {
-            $table->dropColumn('jurusan');
-        });
+        Schema::dropIfExists('departments');
     }
 };

@@ -11,8 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Mengubah tabel 'cluster_result'
         Schema::table('cluster_result', function (Blueprint $table) {
-            $table->dropColumn('no');
+            // Mengubah kolom 'status_lulus' menjadi string dengan panjang 20
+            $table->string('status_lulus', 20)->change();
         });
     }
 
@@ -21,8 +23,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Mengembalikan kolom 'status_lulus' ke panjang semula (25) jika di-rollback
         Schema::table('cluster_result', function (Blueprint $table) {
-            $table->integer('no')->after('cluster_id');
+            $table->string('status_lulus', 25)->change();
         });
     }
 };

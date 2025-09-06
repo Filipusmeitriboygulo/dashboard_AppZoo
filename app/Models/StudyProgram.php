@@ -13,7 +13,6 @@ class StudyProgram extends Model
         'department_id',
         'name',
         'code',
-        'head_id',
     ];
 
     public function department()
@@ -21,20 +20,20 @@ class StudyProgram extends Model
         return $this->belongsTo(Department::class);
     }
 
-    public function head()
-    {
-        return $this->belongsTo(User::class, 'head_id');
-    }
+    // public function head()
+    // {
+    //     return $this->belongsTo(User::class, 'head_id');
+    // }
 
     public function classes()
     {
         return $this->hasMany(ClassModel::class);
     }
 
-    public function students()
-    {
-        return $this->hasMany(Student::class);
-    }
+    // public function students()
+    // {
+    //     return $this->hasMany(Student::class);
+    // }
 
     public function users()
     {

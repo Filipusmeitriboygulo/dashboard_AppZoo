@@ -69,13 +69,20 @@ class KlasterisasiController extends Controller
                 ->attach('file', file_get_contents($filePath), $file->file_name)
                 ->post('http://127.0.0.1:5000/cluster');
 
+            // dd($response->body());
+
             if (!$response->successful()) {
                 throw new \Exception('API Error: ' . $response->body());
             }
 
             $apiResult = $response->json();
             // dd($apiResult);
-
+            // dd(
+            //     'Status HTTP:',
+            //     $response->status(),
+            //     'Isi Respon (Body):',
+            //     $response->body()
+            // );
             if ($apiResult['status'] !== 'success') {
                 throw new \Exception($apiResult['message'] ?? 'Invalid API response');
             }
@@ -108,6 +115,9 @@ class KlasterisasiController extends Controller
                         'upload_id' => $file->id,
                         'nim' => $studentData['Nim Mahasiswa']
                     ])->first();
+
+                    // TAMBAHKAN DD DI SINI UNTUK MELIHAT HASIL PENCOCOKAN
+                    // dd($studentData, $toeflEntry);
 
                     if (!$toeflEntry) {
                         throw new \Exception("Data TOEFL untuk NIM {$studentData['Nim Mahasiswa']} tidak ditemukan");
@@ -143,6 +153,8 @@ class KlasterisasiController extends Controller
                 return redirect()->route('klasterisasi.result', ['upload_id' => $file->id])
                     ->with('success', 'Analisis klasterisasi berhasil dilakukan');
             } catch (\Exception $e) {
+                // TAMBAHKAN DD DI SINI UNTUK MELIHAT PESAN ERROR ASLI
+                dd($e);
                 DB::rollBack();
                 return redirect()->back()
                     ->withErrors(['error' => 'Gagal menyimpan hasil klasterisasi: ' . $e->getMessage()])
@@ -231,7 +243,7 @@ class KlasterisasiController extends Controller
     {
         $upload = UploadLog::with(['clusterResults', 'clusterResults.toeflScoreEntry'])->findOrFail($upload_id);
 
-
+        // dd($upload->clusterResults);
 
         // Ambil semua clusterResults lalu paginasi manual (jika bukan relasi langsung paginateable)
         $clusterResults = $upload->clusterResults;
