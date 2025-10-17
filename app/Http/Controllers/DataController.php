@@ -34,60 +34,6 @@ class DataController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    // public function upload(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'files.*' => 'required|file|mimes:csv,txt|max:5120' // Max 5MB
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => $validator->errors()->first()
-    //         ]);
-    //     }
-
-    //     try {
-    //         $uploadedFiles = [];
-
-    //         $holla = $request->file('files');
-    //         dd($holla);
-    //         dd($holla->getClientOriginalName());
-
-    //         foreach ($request->file('files') as $file) {
-    //             // Simpan file
-    //             $filename = time() . '_' . $file->getClientOriginalName();
-    //             $path = $file->storeAs('csv_uploads', $filename);
-
-    //             dd($filename);
-
-    //             // Proses file CSV
-    //             $csvData = array_map('str_getcsv', file($file->getRealPath()));
-    //             $header = array_shift($csvData);
-
-    //             // Simpan ke database
-    //             $csvRecord = FileUpload::create([
-    //                 'filename' => $filename,
-    //                 'path' => $path,
-    //                 'header' => $header,
-    //                 'data' => $csvData
-    //             ]);
-
-    //             $uploadedFiles[] = $csvRecord;
-    //         }
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'File berhasil diupload!',
-    //             'files' => $uploadedFiles
-    //         ]);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-    //         ]);
-    //     }
-    // }
 
     public function upload(Request $request)
     {

@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', 'Manajemen Pengguna')
+@section('title', 'Manajemen Jurusan')
 
 @section('content')
     <div class="container py-5">
@@ -9,7 +9,7 @@
                 <div class="card shadow-lg">
                     <div class="card-header bg-gradient-primary text-white">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h4 class="mb-0"><i class="fas fa-users me-2"></i> Manajemen Pengguna</h4>
+                            <h4 class="mb-0"><i class="fas fa-users me-2"></i> Manajemen Jurusan</h4>
                             <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#tambahUserModal">
                                 <i class="fas fa-user-plus me-1"></i> Tambah Baru
                             </button>
@@ -37,44 +37,41 @@
                             <table class="table table-striped table-hover">
                                 <thead>
                                     <tr>
-                                        <th>No</th>
-                                        <th>Nama</th>
-                                        <th>Email</th>
-                                        <th>Role</th>
-                                        <th>Status</th>
+                                        <th>No.</th>
+                                        <th>Nama Jurusan</th>
+                                        <th>Akronim Jurusan</th>
                                         <th class="text-center">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($users as $user)
+                                    @foreach ($departments as $department)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $user->name }}</td>
-                                            <td>{{ $user->email }}</td>
-                                            <td>{{ ucfirst(str_replace('_', ' ', $user->role)) }}</td>
-                                            <td>
-                                                <span class="badge bg-{{ $user->is_active ? 'success' : 'danger' }}">
-                                                    {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
-                                                </span>
-                                            </td>  
+                                            <td>{{ $department->name }}</td>
+                                            <td>{{ $department->code }}</td>
+
                                             <td class="text-center">
                                                 <div class="btn-group" role="group" aria-label="Basic example">
                                                     <!-- Tombol View (Link ke detail page) -->
-                                                    <a href="{{ route('admin.users.show', ['id' => $user->id]) }}"
+                                                    <a href="{{ route('admin.jurusan.show', ['id' => $department->id]) }}"
                                                         class="btn btn-sm btn-info mx-1" title="Lihat Detail">
                                                         <i class="fas fa-eye"></i> View
                                                     </a>
 
                                                     <!-- Tombol Edit (Link ke edit page) -->
                                                     <button class="btn btn-sm btn-warning mx-1 btn-edit"
-                                                        data-bs-toggle="modal" data-bs-target="#editUserModal"
-                                                        data-user-id="{{ $user->id }}"
-                                                        data-user='@json($user)' title="Edit">
+                                                        data-bs-toggle="modal" data-bs-target="#editJurusanModal"
+                                                        data-id="{{ $department->id }}" data-name="{{ $department->name }}"
+                                                        data-code="{{ $department->code }}"
+                                                        data-url="{{ route('admin.jurusan.update', $department->id) }}">
                                                         <i class="fas fa-edit"></i>Edit
                                                     </button>
 
+
+
                                                     <!-- Tombol Delete (Form) -->
-                                                    <form action="{{ route('admin.users.destroy', ['id' => $user->id]) }}"
+                                                    <form
+                                                        action="{{ route('admin.jurusan.destroy', ['id' => $department->id]) }}"
                                                         method="POST" class="d-inline">
                                                         @csrf
                                                         @method('DELETE')
@@ -98,8 +95,8 @@
     </div>
 
     <!-- Di main view (index.blade.php) -->
-    @include('admin.users.modals.create')
+    @include('admin.jurusan.modals.create')
 
-    @include('admin.users.modals.update')
+    @include('admin.jurusan.modals.update')
 
 @endsection

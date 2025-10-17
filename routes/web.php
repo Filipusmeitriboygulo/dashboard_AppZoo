@@ -6,7 +6,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DataUploadController;
+use App\Http\Controllers\Admin\JurusanController;
 use App\Http\Controllers\Admin\KlasterisasiController;
+use App\Http\Controllers\Admin\ProdiController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\KepalaUPA\KepalaUPAController;
@@ -123,12 +125,26 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     // Route::get('/export-excel/{upload_id}', [ExportController::class, 'exportExcel'])->name('export.excel');
     // Route::get('/export-pdf/{upload_id}', [ExportController::class, 'exportPdf'])->name('export.pdf');
 
-    // Tambah User
+    // Kelola  User
     Route::get('/users', [UserController::class, 'index'])->name('admin.users.index');
     Route::post('/users', [UserController::class, 'store'])->name('admin.users.store');
     Route::get('/users/{id}', [UserController::class, 'show'])->name('admin.users.show');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('admin.users.update');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('admin.users.destroy');
+
+    // Kelola Jurusan
+    Route::get('/jurusan', [JurusanController::class, 'index'])->name('admin.jurusan.index');
+    Route::post('/jurusan', [JurusanController::class, 'store'])->name('admin.jurusan.store');
+    Route::get('/jurusan/{id}', [JurusanController::class, 'show'])->name('admin.jurusan.show');
+    Route::put('/jurusan/{id}', [JurusanController::class, 'update'])->name('admin.jurusan.update');
+    Route::delete('/jurusan/{id}', [JurusanController::class, 'destroy'])->name('admin.jurusan.destroy');
+
+    // Kelola Prodi
+    Route::get('/prodi', [ProdiController::class, 'index'])->name('admin.prodi.index');
+    Route::post('/prodi', [ProdiController::class, 'store'])->name('admin.prodi.store');
+    Route::get('/prodi/{id}', [ProdiController::class, 'show'])->name('admin.prodi.show');
+    Route::put('/prodi/{id}', [ProdiController::class, 'update'])->name('admin.prodi.update');
+    Route::delete('/prodi/{id}', [ProdiController::class, 'destroy'])->name('admin.prodi.destroy');
 });
 
 
@@ -154,7 +170,6 @@ Route::prefix('ketua-prodi')->middleware('role:ketua_prodi')->group(function () 
 });
 
 // Wakil Direktur routes
-
 
 
 Route::post('/toefl/upload', [ScoreController::class, 'upload'])->name('toefl.upload');

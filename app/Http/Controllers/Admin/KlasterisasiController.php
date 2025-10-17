@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ClusterResult;
+use App\Models\Department;
+use App\Models\StudyProgram;
 use App\Models\ToeflScoreEntry;
 use App\Models\UploadLog;
 use Illuminate\Http\Request;
@@ -25,6 +27,7 @@ class KlasterisasiController extends Controller
     {
         $user = Auth::user();
 
+
         if (in_array($user->role, ['admin', 'kepala_upa', 'wakil_direktur'])) {
             $file_uploads = UploadLog::with('toeflScores')->get();
         } elseif ($user->role === 'ketua_jurusan') {
@@ -44,7 +47,11 @@ class KlasterisasiController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        return view('admin.klasterisasi.index', compact('file_uploads'));
+        $departments = Department::all();
+        $studyPrograms = StudyProgram::all();
+
+
+        return view('admin.klasterisasi.index', compact('file_uploads', 'departments', 'studyPrograms'));
     }
 
     public function analyze(Request $request)

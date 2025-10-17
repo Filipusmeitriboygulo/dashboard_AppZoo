@@ -39,7 +39,7 @@
                                         'campus' => [
                                             'icon' => 'fa-university',
                                             'color' => 'primary',
-                                            'label' => 'Seluruh Jurusan',
+                                            'label' => 'Politeknik Negeri Lhokseumawe',
                                         ],
                                         'department' => [
                                             'icon' => 'fa-building',
@@ -67,7 +67,7 @@
                                                         {{ str_replace('_', ' ', $scope) }}</p>
                                                     @if ($scope === 'campus')
                                                         <button class="btn btn-{{ $icons[$scope]['color'] }}"
-                                                            onclick="showUploadModal('{{ $scope }}', '', 'Seluruh Jurusan')">Upload</button>
+                                                            onclick="showUploadModal('{{ $scope }}', '', 'Politeknik Negeri Lhokseumawe')">Upload</button>
                                                     @else
                                                         <div class="dropdown">
                                                             <button
@@ -95,7 +95,6 @@
                                                                             </li>
                                                                         @endforeach
                                                                     @elseif ($scope === 'class')
-                                                                        
                                                                     @endif
                                                                 @endforeach
                                                             </ul>
@@ -285,7 +284,7 @@
             let label = '';
             switch (scope) {
                 case 'campus':
-                    label = 'Seluruh Jurusan ';
+                    label = 'Politeknik Negeri Lhokseumawe ';
                     break;
                 case 'department':
                     label = 'Jurusan: ' + scopeName;

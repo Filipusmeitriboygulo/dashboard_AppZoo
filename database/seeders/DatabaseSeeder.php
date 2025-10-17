@@ -13,7 +13,6 @@ class DatabaseSeeder extends Seeder
             StudyProgramSeeder::class,
             UserSeeder::class,
             ClassSeeder::class,
-            StudentSeeder::class,
         ]);
     }
 }

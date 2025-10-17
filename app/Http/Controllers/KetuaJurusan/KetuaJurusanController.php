@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\KetuaJurusan;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department;
+use App\Models\StudyProgram;
 use App\Models\UploadLog;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -49,7 +51,11 @@ class KetuaJurusanController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('admin.klasterisasi.index', compact('file_uploads'));
+        $departments = Department::all();
+        $studyPrograms = StudyProgram::all();
+
+
+        return view('admin.klasterisasi.index', compact('file_uploads', 'departments', 'studyPrograms'));
     }
 
 

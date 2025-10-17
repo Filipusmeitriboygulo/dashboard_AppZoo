@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\KepalaUPA;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department;
+use App\Models\StudyProgram;
 use App\Models\UploadLog;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -26,7 +28,11 @@ class KepalaUPAController extends Controller
             $file_uploads = UploadLog::orderBy('created_at', 'desc')->get();
         }
 
-        return view('admin.klasterisasi.index', compact('file_uploads'));
+        $departments = Department::all();
+        $studyPrograms = StudyProgram::all();
+
+
+        return view('admin.klasterisasi.index', compact('file_uploads', 'departments', 'studyPrograms'));
     }
 
     public function result($upload_id)

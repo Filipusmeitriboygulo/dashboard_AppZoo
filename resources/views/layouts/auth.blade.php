@@ -9,6 +9,11 @@
 
     <link rel="shortcut icon" type="image/png" href="{{ asset('assets/auth/images/logos/logo.png') }}" />
     <link rel="stylesheet" href="{{ asset('assets/auth/css/styles.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/cluster_style.css') }}" />
+
+
+    
+
 
     @stack('styles')
 </head>
@@ -57,7 +62,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-
 
     <!-- Custom Scripts -->
     @stack('scripts')

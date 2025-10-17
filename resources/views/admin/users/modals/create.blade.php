@@ -15,7 +15,8 @@
                         <!-- Nama -->
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="text" name="name" id="name" class="form-control" placeholder="Nama Lengkap" required>
+                                <input type="text" name="name" id="name" class="form-control"
+                                    placeholder="Nama Lengkap" required>
                                 <label for="name">Nama Lengkap</label>
                             </div>
                         </div>
@@ -23,7 +24,8 @@
                         <!-- Email -->
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="email" name="email" id="email" class="form-control" placeholder="Alamat Email" required>
+                                <input type="email" name="email" id="email" class="form-control"
+                                    placeholder="Alamat Email" required>
                                 <label for="email">Alamat Email</label>
                             </div>
                         </div>
@@ -83,9 +85,11 @@
                         <!-- Password -->
                         <div class="col-12">
                             <div class="form-floating position-relative">
-                                <input type="password" name="password" id="password" class="form-control" placeholder="Password">
+                                <input type="password" name="password" id="password" class="form-control"
+                                    placeholder="Password">
                                 <label for="password">Password</label>
-                                <small class="text-muted">Biarkan kosong untuk menggunakan password default: 'password'</small>
+                                <small class="text-muted">Biarkan kosong untuk menggunakan password default:
+                                    'password'</small>
                             </div>
                         </div>
                     </div>
@@ -106,7 +110,7 @@
 
 {{-- Script --}}
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const roleSelect = document.getElementById('role');
         const departmentGroup = document.getElementById('department-group');
         const studyProgramGroup = document.getElementById('study-program-group');
@@ -141,7 +145,7 @@
         generatePasswordBtn.type = 'button';
         generatePasswordBtn.className = 'btn btn-sm btn-outline-secondary mt-2';
         generatePasswordBtn.innerHTML = '<i class="fas fa-random me-1"></i> Generate Password';
-        generatePasswordBtn.onclick = function () {
+        generatePasswordBtn.onclick = function() {
             const randomString = Math.random().toString(36).slice(-8);
             passwordField.value = randomString;
         };

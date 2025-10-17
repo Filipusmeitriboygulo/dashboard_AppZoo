@@ -15,7 +15,6 @@
                     <p class="text-muted">Silakan pilih file dan cakupan data untuk proses klasterisasi.</p>
 
                     {{-- FORM KLASTERISASI --}}
-
                     <form method="POST" action="{{ route('klasterisasi.analyze') }}">
                         @csrf
                         <div class="row mb-3">
@@ -29,10 +28,31 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-6">
-                                <label for="unit_name" class="form-label">Nama Unit</label>
-                                <input type="text" class="form-control" id="unit_name" name="unit_name"
-                                    placeholder="Contoh: Teknik Informatika" required>
+                            {{-- Input untuk Kampus (akan tersembunyi) --}}
+                            <div class="col-md-6 d-none" id="kampusContainer">
+                                <label for="unit_name_kampus" class="form-label">Nama Kampus</label>
+                                <input type="text" class="form-control" id="unit_name_kampus" name="unit_name_kampus"
+                                    value="Politeknik Negeri Lhokseumawe" readonly>
+                            </div>
+
+                            {{-- Dropdown untuk Jurusan --}}
+                            <div class="col-md-6 d-none" id="jurusanContainer">
+                                <label for="unit_name_jurusan" class="form-label">Pilih Jurusan</label>
+                                <select class="form-select" id="unit_name_jurusan" name="unit_name_jurusan">
+                                    <option value="">-- Pilih Jurusan --</option>
+                                    @foreach ($departments as $department)
+                                        <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- Dropdown untuk Prodi berdasarkan Jurusan --}}
+                            <div class="col-md-6 d-none" id="prodiContainer">
+                                <label for="unit_name_prodi" class="form-label">Pilih Program Studi</label>
+                                <select class="form-select" id="unit_name_prodi" name="unit_name_prodi">
+                                    <option value="">-- Pilih Program Studi --</option>
+                                    <!-- Opsi prodi akan diisi melalui JavaScript -->
+                                </select>
                             </div>
                         </div>
 
@@ -55,6 +75,7 @@
                             </button>
                         </div>
                     </form>
+                </div>
             @endif
 
             {{-- TABEL FILE YANG PERNAH DIUPLOAD --}}
@@ -96,7 +117,6 @@
                                                 </a>
 
                                                 <!-- Tombol Proses Ulang -->
-                                                {{-- Hanya Admin --}}
                                                 @if (auth()->user()->role === 'admin')
                                                     <form action="{{ route('klasterisasi.reanalyze', $upload->id) }}"
                                                         method="POST" class="d-inline">
@@ -113,29 +133,6 @@
                                                 @endif
                                             </div>
                                         </td>
-
-                                        <style>
-                                            .hover-effect:hover {
-                                                transform: translateY(-2px);
-                                                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                                            }
-
-                                            .btn-primary {
-                                                background: linear-gradient(135deg, #3b82f6, #2563eb);
-                                                border: none;
-                                            }
-
-                                            .btn-warning {
-                                                background: linear-gradient(135deg, #f59e0b, #d97706);
-                                                border: none;
-                                                color: white;
-                                            }
-
-                                            .btn-warning:hover {
-                                                color: white;
-                                            }
-                                        </style>
-
                                     </tr>
                                 @empty
                                     <tr>
@@ -148,7 +145,6 @@
                 </div>
             </div>
 
-
             @if (session('debug'))
                 <div class="mt-4 p-3 bg-light border">
                     <h5>Debug Information</h5>
@@ -157,48 +153,64 @@
             @endif
         </div>
     </div>
-    </div>
 @endsection
 
 @push('scripts')
     <script>
         $(document).ready(function() {
+            // Data program studi dari database (dikirim dari controller)
+            const studyPrograms = @json($studyPrograms);
+
             // Initialize disabled states
-            $('#unit_name').prop('disabled', true);
             $('#file_upload_id').prop('disabled', true);
             $('#analyzeBtn').prop('disabled', true);
 
             // Cakupan change handler
             $('#cakupan').change(function() {
                 const cakupan = $(this).val();
-                const unitName = $('#unit_name').val();
 
-                // Enable/disable unit name field based on cakupan selection
-                $('#unit_name').prop('disabled', !cakupan);
+                // Sembunyikan semua container terlebih dahulu
+                $('#kampusContainer, #jurusanContainer, #prodiContainer').addClass('d-none');
 
-                // If cakupan is selected, enable file selection
-                if (cakupan) {
-                    filterFilesByScope(cakupan, unitName);
-                    $('#file_upload_id').prop('disabled', false);
-                } else {
-                    $('#file_upload_id').prop('disabled', true);
-                    $('#file_upload_id').val('');
-                    $('#analyzeBtn').prop('disabled', true);
+                // Reset semua input/select
+                $('#unit_name_kampus, #unit_name_jurusan, #unit_name_prodi').val('');
+
+                // Tampilkan container yang sesuai dengan pilihan
+                if (cakupan === 'kampus') {
+                    $('#kampusContainer').removeClass('d-none');
+                    $('#unit_name_kampus').val('Politeknik Negeri Lhokseumawe');
+                } else if (cakupan === 'jurusan') {
+                    $('#jurusanContainer').removeClass('d-none');
+                } else if (cakupan === 'prodi') {
+                    $('#prodiContainer').removeClass('d-none');
+                    populateStudyPrograms();
+                }
+
+                // Enable file selection
+                $('#file_upload_id').prop('disabled', false);
+                filterFilesByScope(cakupan);
+            });
+
+            // Jurusan change handler
+            $('#unit_name_jurusan').change(function() {
+                const jurusanId = $(this).val();
+                const jurusanName = $(this).find('option:selected').text();
+
+                if (jurusanId) {
+                    filterFilesByScope('jurusan', jurusanName);
+
+                    // Jika prodi container terlihat, perbarui daftar prodi
+                    if (!$('#prodiContainer').hasClass('d-none')) {
+                        populateStudyPrograms(jurusanId);
+                    }
                 }
             });
 
-            // Unit name change handler
-            $('#unit_name').change(function() {
-                const cakupan = $('#cakupan').val();
-                const unitName = $(this).val();
-
-                if (cakupan && unitName) {
-                    filterFilesByScope(cakupan, unitName);
-                    $('#file_upload_id').prop('disabled', false);
-                } else {
-                    $('#file_upload_id').prop('disabled', true);
-                    $('#file_upload_id').val('');
-                    $('#analyzeBtn').prop('disabled', true);
+            // Prodi change handler
+            $('#unit_name_prodi').change(function() {
+                const prodiName = $(this).find('option:selected').text();
+                if (prodiName) {
+                    filterFilesByScope('prodi', prodiName);
                 }
             });
 
@@ -208,14 +220,41 @@
                 $('#analyzeBtn').prop('disabled', !fileSelected);
             });
 
+            // Fungsi untuk mengisi dropdown program studi
+            function populateStudyPrograms(departmentId = null) {
+                const prodiSelect = $('#unit_name_prodi');
+                prodiSelect.empty().append('<option value="">-- Pilih Program Studi --</option>');
+
+                studyPrograms.forEach(program => {
+                    // Jika departmentId diberikan, hanya tampilkan prodi dari jurusan tersebut
+                    if (!departmentId || program.department_id == departmentId) {
+                        prodiSelect.append(
+                            $('<option>', {
+                                value: program.id,
+                                text: program.name
+                            })
+                        );
+                    }
+                });
+            }
+
             // Filter files by scope and unit name
-            function filterFilesByScope(cakupan) {
+            function filterFilesByScope(cakupan, unitName = '') {
                 $('#file_upload_id').val(''); // Reset pilihan file
+
+                // Jika kampus, set unitName ke 'Politeknik Negeri Lhokseumawe'
+                if (cakupan === 'kampus') {
+                    unitName = 'Politeknik Negeri Lhokseumawe';
+                }
 
                 $('#file_upload_id option[data-cakupan]').each(function() {
                     const optionCakupan = $(this).data('cakupan');
-                    const isMatch = cakupan === 'kampus' ? optionCakupan === 'kampus' : optionCakupan ===
-                        cakupan;
+                    const optionUnit = $(this).data('unit');
+
+                    // Tampilkan hanya file dengan cakupan dan unit yang sesuai
+                    const isMatch = optionCakupan === cakupan &&
+                        (unitName === '' || optionUnit === unitName);
+
                     $(this).toggle(isMatch);
                 });
 
@@ -223,14 +262,15 @@
                 if ($('#file_upload_id option:visible').length === 0) {
                     $('#file_upload_id').append(
                         $('<option>', {
-                            text: 'Tidak ada file yang tersedia',
+                            value: '',
+                            text: 'Tidak ada file yang tersedia untuk pilihan ini',
+                            disabled: true,
+                            selected: true
                         })
                     );
+                    $('#analyzeBtn').prop('disabled', true);
                 }
             }
-
-
-
         });
     </script>
 @endpush
